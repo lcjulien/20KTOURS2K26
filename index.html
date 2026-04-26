@@ -1,0 +1,1076 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="Tours 20km"/>
+<meta name="theme-color" content="#0a0a0a"/>
+<title>20km de Tours</title>
+<link rel="manifest" href="manifest.json"/>
+<link rel="apple-touch-icon" href="icon-180.png"/>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;400;600;700;800;900&family=Barlow:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+/* ═══════════════════════════════════════════════════
+   DESIGN TOKENS
+═══════════════════════════════════════════════════ */
+:root {
+  --orange:    #fc4c02;
+  --orange2:   #ff6b35;
+  --orange-bg: rgba(252,76,2,.12);
+  --bg:        #0a0a0a;
+  --bg2:       #141414;
+  --bg3:       #1c1c1c;
+  --card:      #181818;
+  --card2:     #202020;
+  --border:    #282828;
+  --border2:   #323232;
+  --text:      #f0f0f0;
+  --text2:     #909090;
+  --text3:     #505050;
+  --green:     #30d158;
+  --blue:      #0a84ff;
+  --yellow:    #ffd60a;
+  --pink:      #ff375f;
+  --ring1:     #fc4c02;   /* Move  – orange Strava */
+  --ring2:     #30d158;   /* Stand – vert Apple    */
+  --ring3:     #0a84ff;   /* Exercise – bleu Apple */
+  --safe-top:  env(safe-area-inset-top, 44px);
+  --safe-bot:  env(safe-area-inset-bottom, 34px);
+  --tab-h:     56px;
+  --r:         14px;
+  --r-sm:      10px;
+}
+
+*,*::before,*::after { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
+html,body { height:100%; overflow:hidden; background:var(--bg); color:var(--text); font-family:'Barlow',sans-serif; -webkit-font-smoothing:antialiased; }
+
+/* ── LAYOUT ── */
+#app { display:flex; flex-direction:column; height:100%; }
+#content { flex:1; overflow-y:auto; overflow-x:hidden; -webkit-overflow-scrolling:touch; padding-bottom:calc(var(--tab-h) + var(--safe-bot) + 16px); scroll-behavior:smooth; }
+#content::-webkit-scrollbar { display:none; }
+
+/* ════════════════════════════════════════════════
+   HEADER — Strava style
+════════════════════════════════════════════════ */
+#header {
+  padding: calc(var(--safe-top) + 6px) 16px 12px;
+  background: linear-gradient(180deg, #0a0a0a 0%, transparent 100%);
+  flex-shrink: 0;
+  position: sticky; top: 0; z-index: 50;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+.hdr-row { display:flex; align-items:center; justify-content:space-between; }
+.hdr-left { display:flex; align-items:center; gap:10px; }
+.hdr-logo { width:34px; height:34px; border-radius:10px; object-fit:cover; }
+.hdr-title { font-family:'Barlow Condensed',sans-serif; font-size:22px; font-weight:900; letter-spacing:.06em; color:var(--orange); line-height:1; }
+.hdr-date { font-size:11px; color:var(--text3); margin-top:1px; letter-spacing:.02em; }
+/* XP badge */
+.hdr-xp { display:flex; align-items:center; gap:8px; }
+.lv-pill { background:var(--orange); color:#fff; font-family:'Barlow Condensed',sans-serif; font-size:14px; font-weight:800; padding:4px 12px; border-radius:20px; letter-spacing:.06em; white-space:nowrap; }
+.hdr-xp-bar { width:70px; }
+.xp-track { height:3px; background:var(--border2); border-radius:2px; overflow:hidden; margin-top:3px; }
+.xp-fill { height:100%; background:linear-gradient(90deg,var(--orange),var(--orange2)); border-radius:2px; transition:width .8s cubic-bezier(.4,0,.2,1); }
+.xp-nums { font-family:'JetBrains Mono',monospace; font-size:9px; color:var(--text3); text-align:right; margin-top:2px; }
+
+/* ── Streak row ── */
+.streak-row { display:flex; align-items:center; gap:6px; margin-top:10px; padding:8px 12px; background:linear-gradient(90deg,rgba(252,76,2,.1),transparent); border-left:2px solid var(--orange); border-radius:0 var(--r-sm) var(--r-sm) 0; }
+.streak-flame { font-size:18px; }
+.streak-text { font-family:'Barlow Condensed',sans-serif; font-size:16px; font-weight:800; color:var(--orange); }
+.streak-label { font-size:11px; color:var(--text2); flex:1; }
+.streak-dots { display:flex; gap:4px; }
+.s-dot { width:20px; height:20px; border-radius:50%; border:1.5px solid var(--border2); font-size:8px; display:flex; align-items:center; justify-content:center; color:var(--text3); font-family:'JetBrains Mono',monospace; }
+.s-dot.on { background:var(--orange); border-color:var(--orange); color:#fff; font-size:11px; }
+.s-dot.cur { border-color:var(--orange); color:var(--orange); }
+
+/* ════════════════════════════════════════════════
+   TABBAR
+════════════════════════════════════════════════ */
+#tabbar {
+  position:fixed; bottom:0; left:0; right:0;
+  height:calc(var(--tab-h) + var(--safe-bot));
+  padding-bottom:var(--safe-bot);
+  background:rgba(10,10,10,.95);
+  backdrop-filter:blur(24px); -webkit-backdrop-filter:blur(24px);
+  border-top:1px solid var(--border);
+  display:flex; z-index:100;
+}
+.tab { flex:1; height:var(--tab-h); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; border:none; background:transparent; color:var(--text3); font-family:'Barlow',sans-serif; font-size:10px; font-weight:600; cursor:pointer; transition:color .15s; position:relative; }
+.tab svg { width:22px; height:22px; }
+.tab.active { color:var(--orange); }
+.tab-dot { position:absolute; top:6px; right:calc(50% - 14px); width:6px; height:6px; border-radius:50%; background:var(--orange); display:none; }
+.tab.has-notif .tab-dot { display:block; }
+
+/* ════════════════════════════════════════════════
+   VIEWS
+════════════════════════════════════════════════ */
+.view { display:none; }
+.view.active { display:block; }
+.pad { padding:0 16px 8px; }
+.section-hd { font-family:'Barlow Condensed',sans-serif; font-size:12px; font-weight:700; color:var(--text3); text-transform:uppercase; letter-spacing:.14em; margin:16px 0 8px; }
+
+/* ════════════════════════════════════════════════
+   HOME VIEW
+════════════════════════════════════════════════ */
+
+/* Countdown hero */
+.hero-card {
+  margin:12px 16px 0;
+  background:linear-gradient(135deg,#180800 0%,#0a0a0a 60%);
+  border:1px solid rgba(252,76,2,.3);
+  border-radius:var(--r);
+  padding:18px;
+  position:relative;
+  overflow:hidden;
+}
+.hero-card::after { content:''; position:absolute; top:-60px; right:-60px; width:160px; height:160px; background:radial-gradient(circle,rgba(252,76,2,.15),transparent 70%); border-radius:50%; pointer-events:none; }
+.hero-sup { font-family:'Barlow Condensed',sans-serif; font-size:11px; font-weight:700; color:var(--orange); text-transform:uppercase; letter-spacing:.12em; margin-bottom:4px; }
+.hero-title { font-family:'Barlow Condensed',sans-serif; font-size:30px; font-weight:900; line-height:1.05; }
+.hero-sub { font-size:12px; color:var(--text2); margin-top:3px; }
+.hero-body { display:flex; justify-content:space-between; align-items:flex-end; }
+.hero-left {}
+.hero-countdown { text-align:right; }
+.cd-num { font-family:'Barlow Condensed',sans-serif; font-size:52px; font-weight:900; color:var(--orange); line-height:1; }
+.cd-unit { font-size:11px; color:var(--text2); letter-spacing:.08em; }
+.hero-stats { display:flex; gap:0; margin-top:16px; padding-top:14px; border-top:1px solid rgba(255,255,255,.07); }
+.hs { flex:1; text-align:center; }
+.hs+.hs { border-left:1px solid rgba(255,255,255,.07); }
+.hs-val { font-family:'Barlow Condensed',sans-serif; font-size:22px; font-weight:800; color:var(--orange); }
+.hs-lbl { font-size:10px; color:var(--text3); margin-top:1px; }
+
+/* ── APPLE WATCH RINGS SECTION ── */
+.rings-section { margin:0 16px; }
+.rings-card { background:var(--card); border:1px solid var(--border); border-radius:var(--r); padding:20px 16px; display:flex; align-items:center; gap:20px; }
+.rings-svg-wrap { position:relative; flex-shrink:0; }
+.rings-center-text { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+.rings-pct-big { font-family:'Barlow Condensed',sans-serif; font-size:22px; font-weight:900; color:var(--text); line-height:1; }
+.rings-pct-sub { font-family:'JetBrains Mono',monospace; font-size:9px; color:var(--text3); }
+.rings-legend { flex:1; display:flex; flex-direction:column; gap:10px; }
+.ring-legend-row { display:flex; align-items:center; gap:10px; }
+.ring-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+.ring-legend-label { font-size:13px; color:var(--text2); flex:1; }
+.ring-legend-val { font-family:'Barlow Condensed',sans-serif; font-size:16px; font-weight:700; }
+.ring-legend-pct { font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--text3); }
+
+/* ── Next session card ── */
+.next-card { margin:0 16px; background:var(--card); border:1px solid var(--border); border-radius:var(--r); padding:16px 16px 16px 20px; position:relative; overflow:hidden; }
+.next-card.live { border-color:rgba(252,76,2,.4); }
+.next-accent { position:absolute; left:0; top:0; bottom:0; width:4px; border-radius:4px 0 0 4px; }
+.next-eyebrow { font-family:'Barlow Condensed',sans-serif; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.12em; color:var(--text3); margin-bottom:5px; }
+.next-type { font-family:'Barlow Condensed',sans-serif; font-size:26px; font-weight:900; line-height:1; margin-bottom:4px; }
+.next-detail { font-size:13px; color:var(--text2); line-height:1.45; margin-bottom:10px; }
+.next-pills { display:flex; gap:6px; flex-wrap:wrap; }
+.npill { font-size:11px; font-weight:600; padding:4px 10px; border-radius:20px; background:var(--bg3); color:var(--text2); }
+.npill.hot { background:var(--orange-bg); color:var(--orange); }
+
+/* ── Global progress card ── */
+.gprog-card { margin:0 16px; background:var(--card); border:1px solid var(--border); border-radius:var(--r); padding:16px; }
+.gprog-header { display:flex; justify-content:space-between; align-items:baseline; margin-bottom:14px; }
+.gprog-title { font-family:'Barlow Condensed',sans-serif; font-size:20px; font-weight:800; }
+.gprog-pct { font-family:'Barlow Condensed',sans-serif; font-size:30px; font-weight:900; color:var(--orange); }
+.gprog-stats { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-bottom:12px; }
+.gpstat { text-align:center; }
+.gpstat-val { font-family:'Barlow Condensed',sans-serif; font-size:20px; font-weight:800; }
+.gpstat-lbl { font-size:10px; color:var(--text3); margin-top:1px; }
+.prog-bar { height:6px; background:var(--border2); border-radius:3px; overflow:hidden; }
+.prog-fill { height:100%; border-radius:3px; transition:width .8s cubic-bezier(.4,0,.2,1); }
+
+/* ════════════════════════════════════════════════
+   PLAN VIEW
+════════════════════════════════════════════════ */
+.wk-scroll { overflow-x:auto; overflow-y:hidden; -webkit-overflow-scrolling:touch; scrollbar-width:none; padding:12px 16px 8px; display:flex; gap:6px; }
+.wk-scroll::-webkit-scrollbar { display:none; }
+.wk-chip { flex-shrink:0; position:relative; padding:7px 16px; border-radius:20px; border:1px solid var(--border2); background:var(--card); font-family:'Barlow Condensed',sans-serif; font-size:15px; font-weight:700; color:var(--text3); cursor:pointer; transition:all .15s; white-space:nowrap; letter-spacing:.04em; }
+.wk-chip.active { background:var(--orange); border-color:var(--orange); color:#fff; }
+.wk-dot { display:none; position:absolute; top:-3px; right:-3px; width:9px; height:9px; border-radius:50%; border:1.5px solid var(--bg); }
+.wk-chip[data-s="done"] .wk-dot { display:block; background:var(--green); }
+.wk-chip[data-s="partial"] .wk-dot { display:block; background:var(--yellow); }
+
+.plan-body { padding:0 16px 8px; }
+
+/* Week header card */
+.wk-hdr { border-radius:var(--r); padding:16px; margin-bottom:10px; border:1px solid; position:relative; overflow:hidden; }
+.wk-hdr-top { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px; }
+.wk-hdr-title { font-family:'Barlow Condensed',sans-serif; font-size:26px; font-weight:900; line-height:1; }
+.wk-hdr-date { font-size:12px; color:var(--text2); margin-top:2px; }
+.wk-km { text-align:right; }
+.wk-km-num { font-family:'Barlow Condensed',sans-serif; font-size:40px; font-weight:900; line-height:1; }
+.wk-km-lbl { font-size:10px; color:var(--text2); }
+/* Mini ring in week header */
+.wk-hdr-bottom { display:flex; align-items:center; gap:14px; }
+.wk-mini-ring { flex-shrink:0; }
+.wk-prog-info { flex:1; }
+.wk-prog-row { display:flex; justify-content:space-between; margin-bottom:4px; }
+.wk-prog-lbl { font-size:12px; color:var(--text2); }
+.wk-prog-val { font-family:'Barlow Condensed',sans-serif; font-size:14px; font-weight:700; }
+.wk-prog-bar { height:5px; background:rgba(0,0,0,.4); border-radius:3px; overflow:hidden; margin-top:6px; }
+.wk-prog-fill { height:100%; border-radius:3px; transition:width .6s; }
+
+/* Session cards */
+.sess { background:var(--card); border:1px solid var(--border); border-radius:var(--r); padding:14px 14px 14px 18px; margin-bottom:8px; position:relative; overflow:hidden; transition:transform .15s, box-shadow .15s; }
+.sess::before { content:''; position:absolute; left:0; top:0; bottom:0; width:4px; background:var(--tc, var(--border)); border-radius:4px 0 0 4px; }
+.sess:active { transform:scale(.99); }
+.sess.done { background:#0d1a10; border-color:#1e3a24; }
+.sess.done::before { background:var(--green); }
+@keyframes race-glow { 0%,100%{box-shadow:0 0 0 0 rgba(252,76,2,.25)} 50%{box-shadow:0 0 16px 4px rgba(252,76,2,.1)} }
+.sess.is-race { border-color:rgba(252,76,2,.5); animation:race-glow 2.5s ease-in-out infinite; }
+
+.sess-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; }
+.sess-day { font-family:'Barlow Condensed',sans-serif; font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.12em; color:var(--text3); }
+.sess-right { display:flex; align-items:center; gap:8px; }
+.sess-xp { font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--orange); font-weight:600; }
+.sess-km { background:var(--bg3); border-radius:10px; padding:2px 8px; font-family:'Barlow Condensed',sans-serif; font-size:14px; font-weight:700; color:var(--text2); }
+
+/* Checkbox — Apple-style */
+.chkbox { width:28px; height:28px; border-radius:50%; border:2px solid var(--border2); background:transparent; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:all .25s cubic-bezier(.34,1.56,.64,1); font-size:14px; color:transparent; flex-shrink:0; }
+.chkbox:active { transform:scale(.82); }
+.chkbox.on { border-color:var(--green); background:var(--green); color:#000; font-size:15px; }
+.chkbox.race { border-color:rgba(252,76,2,.5); }
+.chkbox.race.on { border-color:var(--orange); background:var(--orange); color:#fff; }
+
+.sess-type { font-family:'Barlow Condensed',sans-serif; font-size:19px; font-weight:800; line-height:1; margin-bottom:4px; letter-spacing:.02em; }
+.sess-detail { font-size:13px; color:var(--text2); line-height:1.45; margin-bottom:8px; }
+.sess.done .sess-detail { color:var(--text3); text-decoration:line-through; text-decoration-color:var(--border2); }
+.sess-pills { display:flex; gap:5px; flex-wrap:wrap; }
+.sp { font-size:11px; font-weight:600; padding:3px 9px; border-radius:10px; border:1px solid; }
+.sp-fc { color:var(--text3)!important; border-color:var(--border2)!important; }
+
+/* ════════════════════════════════════════════════
+   STATS VIEW
+════════════════════════════════════════════════ */
+.stats-pad { padding:0 16px 8px; }
+.stat-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:8px; }
+.stat-card { background:var(--card); border:1px solid var(--border); border-radius:var(--r); padding:16px; }
+.stat-card.big { grid-column:span 2; }
+.stat-icon { font-size:20px; margin-bottom:6px; }
+.stat-val { font-family:'Barlow Condensed',sans-serif; font-size:32px; font-weight:900; line-height:1; }
+.stat-lbl { font-size:11px; color:var(--text2); margin-top:3px; }
+.stat-card.accent { background:linear-gradient(135deg,#180800,#0a0a0a); border-color:rgba(252,76,2,.3); }
+.stat-card.accent .stat-val { color:var(--orange); }
+
+/* Volume bars */
+.vol-wrap { background:var(--card); border:1px solid var(--border); border-radius:var(--r); padding:16px; margin-bottom:8px; }
+.vol-bars { display:flex; align-items:flex-end; gap:3px; height:72px; }
+.vol-col { flex:1; display:flex; flex-direction:column; align-items:center; gap:4px; cursor:pointer; }
+.vol-b { width:100%; border-radius:3px 3px 0 0; min-height:3px; transition:all .25s; }
+.vol-l { font-family:'JetBrains Mono',monospace; font-size:8px; color:var(--text3); }
+
+/* Phase rows */
+.phase-row { background:var(--card); border:1px solid var(--border); border-radius:var(--r); padding:14px 16px; margin-bottom:8px; }
+.ph-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
+.ph-name { font-family:'Barlow Condensed',sans-serif; font-size:20px; font-weight:800; }
+.ph-pct { font-family:'Barlow Condensed',sans-serif; font-size:20px; font-weight:800; }
+.ph-bar { height:6px; background:var(--border2); border-radius:3px; overflow:hidden; }
+.ph-fill { height:100%; border-radius:3px; transition:width .7s cubic-bezier(.4,0,.2,1); }
+
+/* ════════════════════════════════════════════════
+   BADGES VIEW
+════════════════════════════════════════════════ */
+.badges-pad { padding:0 16px 8px; }
+.lv-card { background:linear-gradient(135deg,#1a0800,#0a0a0a); border:1px solid rgba(252,76,2,.35); border-radius:var(--r); padding:22px; text-align:center; margin-bottom:16px; position:relative; overflow:hidden; }
+.lv-card::before { content:''; position:absolute; inset:0; background:radial-gradient(ellipse at 50% -20%,rgba(252,76,2,.12),transparent 60%); pointer-events:none; }
+.lv-emoji { font-size:52px; display:block; margin-bottom:8px; }
+.lv-name { font-family:'Barlow Condensed',sans-serif; font-size:34px; font-weight:900; letter-spacing:.04em; line-height:1; }
+.lv-sub { font-size:13px; color:var(--text2); margin-top:4px; margin-bottom:16px; }
+.lv-xp-row { display:flex; justify-content:space-between; margin-bottom:5px; }
+.lv-xp-lbl { font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--text3); }
+.lv-track { height:8px; background:var(--border2); border-radius:4px; overflow:hidden; }
+.lv-fill { height:100%; background:linear-gradient(90deg,var(--orange),var(--orange2)); border-radius:4px; transition:width .8s; }
+
+/* Badge grid */
+.bg-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:12px; }
+.bg-cell { background:var(--card); border:1px solid var(--border); border-radius:var(--r); padding:14px 8px; text-align:center; transition:all .2s; }
+.bg-cell.got { border-color:var(--border2); background:var(--card2); }
+.bg-cell.got .bg-unlock { display:block; }
+.bg-cell.nope { opacity:.35; filter:grayscale(1) brightness(.7); }
+.bg-emoji { font-size:30px; margin-bottom:6px; display:block; }
+.bg-name { font-family:'Barlow Condensed',sans-serif; font-size:13px; font-weight:700; line-height:1.2; }
+.bg-desc { font-size:10px; color:var(--text3); margin-top:3px; line-height:1.3; }
+.bg-unlock { font-size:9px; color:var(--green); font-weight:700; margin-top:4px; display:none; letter-spacing:.04em; }
+
+/* Challenges */
+.ch-card { background:var(--card); border:1px solid var(--border); border-radius:var(--r); padding:14px; margin-bottom:8px; }
+.ch-row { display:flex; gap:10px; align-items:flex-start; margin-bottom:10px; }
+.ch-ico { font-size:22px; flex-shrink:0; padding-top:2px; }
+.ch-info { flex:1; }
+.ch-title { font-family:'Barlow Condensed',sans-serif; font-size:18px; font-weight:800; line-height:1; }
+.ch-desc { font-size:12px; color:var(--text2); margin-top:2px; }
+.ch-rew { text-align:right; }
+.ch-xp { font-family:'Barlow Condensed',sans-serif; font-size:18px; font-weight:900; color:var(--orange); line-height:1; }
+.ch-xpl { font-size:9px; color:var(--text3); }
+.ch-prow { display:flex; justify-content:space-between; margin-bottom:4px; }
+.ch-pl { font-size:11px; color:var(--text3); }
+.ch-pv { font-size:11px; font-weight:600; color:var(--text2); }
+.ch-bar { height:5px; background:var(--border2); border-radius:3px; overflow:hidden; }
+.ch-fill { height:100%; border-radius:3px; transition:width .6s; }
+
+/* ════════════════════════════════════════════════
+   ALLURES VIEW
+════════════════════════════════════════════════ */
+.al-pad { padding:0 16px 8px; }
+.al-card { background:var(--card); border:1px solid var(--border); border-radius:var(--r); padding:14px; margin-bottom:8px; display:flex; gap:12px; }
+.al-stripe { width:4px; flex-shrink:0; border-radius:2px; align-self:stretch; min-height:52px; }
+.al-body { flex:1; }
+.al-key { font-family:'Barlow Condensed',sans-serif; font-size:21px; font-weight:800; line-height:1; }
+.al-pace { font-family:'JetBrains Mono',monospace; font-size:12px; font-weight:600; margin-top:2px; }
+.al-fc { font-size:11px; color:var(--text3); margin-top:1px; }
+.al-desc { font-size:12px; color:var(--text2); line-height:1.4; margin-top:5px; }
+.al-right { display:flex; gap:2px; align-items:flex-end; padding-top:4px; }
+.al-bar { width:4px; border-radius:1px; }
+
+/* ════════════════════════════════════════════════
+   ANIMATIONS & CELEBRATION
+════════════════════════════════════════════════ */
+
+/* XP float */
+@keyframes xp-rise { 0%{opacity:1;transform:translateY(0) scale(1)} 80%{opacity:.8} 100%{opacity:0;transform:translateY(-70px) scale(1.4)} }
+.xp-float { position:fixed; pointer-events:none; z-index:9000; font-family:'Barlow Condensed',sans-serif; font-size:26px; font-weight:900; color:var(--orange); text-shadow:0 0 20px rgba(252,76,2,.6); animation:xp-rise 1s cubic-bezier(.2,.8,.2,1) forwards; }
+
+/* Ring spin-in */
+@keyframes ring-draw { from{stroke-dashoffset:var(--full)} to{stroke-dashoffset:var(--offset)} }
+.ring-animated { animation:ring-draw 1.2s cubic-bezier(.4,0,.2,1) forwards; }
+
+/* Checkmark bounce */
+@keyframes chk-in { 0%{transform:scale(0)} 60%{transform:scale(1.3)} 80%{transform:scale(.9)} 100%{transform:scale(1)} }
+.chkbox.on { animation:chk-in .35s cubic-bezier(.34,1.56,.64,1) forwards; }
+
+/* ── CELEBRATION OVERLAY ── */
+#celebration { position:fixed; inset:0; pointer-events:none; z-index:8000; display:none; }
+#celebration.active { display:block; }
+
+/* Shockwave */
+@keyframes shockwave { 0%{opacity:.8;transform:translate(-50%,-50%) scale(0)} 100%{opacity:0;transform:translate(-50%,-50%) scale(4)} }
+.shock { position:absolute; border-radius:50%; border:3px solid var(--orange); animation:shockwave .6s ease-out forwards; }
+
+/* Confetti particles */
+@keyframes confetti-fall { 0%{transform:translateY(-20px) rotate(0deg);opacity:1} 100%{transform:translateY(120vh) rotate(720deg);opacity:0} }
+.conf { position:absolute; width:8px; height:8px; border-radius:2px; animation:confetti-fall linear forwards; }
+
+/* Star burst */
+@keyframes star-burst { 0%{opacity:1;transform:translate(-50%,-50%) scale(0)} 50%{opacity:1} 100%{opacity:0;transform:translate(calc(-50% + var(--tx)),calc(-50% + var(--ty))) scale(1)} }
+.star { position:absolute; font-size:20px; animation:star-burst .8s ease-out forwards; }
+
+/* Pill toast */
+@keyframes toast-in { 0%{opacity:0;transform:translateX(-50%) translateY(-20px) scale(.9)} 60%{transform:translateX(-50%) translateY(4px) scale(1.02)} 100%{opacity:1;transform:translateX(-50%) translateY(0) scale(1)} }
+@keyframes toast-out { 0%{opacity:1;transform:translateX(-50%) translateY(0)} 100%{opacity:0;transform:translateX(-50%) translateY(-16px)} }
+#toast { position:fixed; top:calc(var(--safe-top) + 12px); left:50%; transform:translateX(-50%) translateY(-40px); opacity:0; background:#1e1e1e; border:1px solid var(--orange); border-radius:28px; padding:10px 20px; display:flex; align-items:center; gap:8px; font-family:'Barlow Condensed',sans-serif; font-size:17px; font-weight:700; color:var(--text); z-index:9001; white-space:nowrap; box-shadow:0 8px 40px rgba(0,0,0,.6); pointer-events:none; }
+#toast.in { animation:toast-in .4s cubic-bezier(.34,1.56,.64,1) forwards; }
+#toast.out { animation:toast-out .3s ease-in forwards; }
+
+/* Slide-up anim for cards */
+@keyframes slide-up { from{opacity:0;transform:translateY(18px)} to{opacity:1;transform:translateY(0)} }
+.su { animation:slide-up .3s ease both; }
+.su1 { animation-delay:.05s; } .su2 { animation-delay:.1s; } .su3 { animation-delay:.15s; } .su4 { animation-delay:.2s; }
+</style>
+</head>
+<body>
+<div id="app">
+
+<!-- HEADER -->
+<div id="header">
+  <div class="hdr-row">
+    <div class="hdr-left">
+      <img src="icon-180.png" class="hdr-logo" alt=""/>
+      <div>
+        <div class="hdr-title">TOURS 20KM</div>
+        <div class="hdr-date">27 Septembre 2026</div>
+      </div>
+    </div>
+    <div class="hdr-xp">
+      <div class="lv-pill" id="hdrLv">🏃 LVL 1</div>
+      <div class="hdr-xp-bar">
+        <div class="xp-track"><div class="xp-fill" id="xpBar" style="width:0%"></div></div>
+        <div class="xp-nums" id="xpNums">0 / 200 XP</div>
+      </div>
+    </div>
+  </div>
+  <div class="streak-row" id="streakRow"></div>
+</div>
+
+<!-- CONTENT -->
+<div id="content">
+
+  <!-- ═══ HOME ═══ -->
+  <div class="view active" id="view-home">
+    <!-- Hero countdown -->
+    <div class="hero-card su">
+      <div class="hero-sup">🏁 Objectif course</div>
+      <div class="hero-body">
+        <div class="hero-left">
+          <div class="hero-title">20km<br>de Tours</div>
+          <div class="hero-sub">Dim. 27 sept. 2026 · Quai Paul Bert</div>
+        </div>
+        <div class="hero-countdown">
+          <div class="cd-num" id="cdDays">—</div>
+          <div class="cd-unit">JOURS</div>
+        </div>
+      </div>
+      <div class="hero-stats">
+        <div class="hs"><div class="hs-val">4'15</div><div class="hs-lbl">allure/km</div></div>
+        <div class="hs"><div class="hs-val">1h25'</div><div class="hs-lbl">objectif</div></div>
+        <div class="hs"><div class="hs-val">20km</div><div class="hs-lbl">distance</div></div>
+        <div class="hs"><div class="hs-val">61m</div><div class="hs-lbl">D+</div></div>
+      </div>
+    </div>
+
+    <div class="pad">
+      <!-- Apple Watch Rings -->
+      <div class="section-hd">ANNEAUX D'ACTIVITÉ</div>
+      <div class="rings-section su su1">
+        <div class="rings-card" id="ringsCard"></div>
+      </div>
+
+      <!-- Next session -->
+      <div class="section-hd">PROCHAINE SÉANCE</div>
+      <div id="nextCard" class="su su2"></div>
+
+      <!-- Global progress -->
+      <div class="section-hd">PROGRESSION PROGRAMME</div>
+      <div class="gprog-card su su3" id="gProgCard"></div>
+    </div>
+  </div>
+
+  <!-- ═══ PLAN ═══ -->
+  <div class="view" id="view-plan">
+    <div class="wk-scroll" id="wkChips"></div>
+    <div class="plan-body" id="planBody"></div>
+  </div>
+
+  <!-- ═══ STATS ═══ -->
+  <div class="view" id="view-stats">
+    <div class="stats-pad">
+      <div class="section-hd" style="margin-top:12px">VUE D'ENSEMBLE</div>
+      <div class="stat-grid" id="statGrid"></div>
+      <div class="section-hd">VOLUME HEBDOMADAIRE</div>
+      <div class="vol-wrap"><div class="vol-bars" id="volBars"></div></div>
+      <div class="section-hd">PAR PHASE</div>
+      <div id="phaseRows"></div>
+    </div>
+  </div>
+
+  <!-- ═══ BADGES ═══ -->
+  <div class="view" id="view-badges">
+    <div class="badges-pad">
+      <div style="height:12px"></div>
+      <div id="lvCard"></div>
+      <div class="section-hd">BADGES</div>
+      <div class="bg-grid" id="bgGrid"></div>
+      <div class="section-hd">DÉFIS</div>
+      <div id="chCards"></div>
+    </div>
+  </div>
+
+  <!-- ═══ ALLURES ═══ -->
+  <div class="view" id="view-allures">
+    <div class="al-pad">
+      <div class="section-hd" style="margin-top:12px">RÉFÉRENTIEL D'ALLURES</div>
+      <div id="alCards"></div>
+    </div>
+  </div>
+
+</div><!-- /content -->
+
+<!-- TABBAR -->
+<div id="tabbar">
+  <button class="tab active" data-v="home">
+    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>Accueil
+    <span class="tab-dot"></span>
+  </button>
+  <button class="tab" data-v="plan">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Programme
+    <span class="tab-dot"></span>
+  </button>
+  <button class="tab" data-v="stats">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Stats
+    <span class="tab-dot"></span>
+  </button>
+  <button class="tab" data-v="badges">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>Trophées
+    <span class="tab-dot"></span>
+  </button>
+  <button class="tab" data-v="allures">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Allures
+    <span class="tab-dot"></span>
+  </button>
+</div>
+
+</div><!-- /app -->
+
+<!-- CELEBRATION CANVAS -->
+<div id="celebration"></div>
+<!-- TOAST -->
+<div id="toast"><span id="t-ico">🏅</span> <span id="t-msg">Badge débloqué !</span></div>
+
+<script>
+/* ══════════════════════════════════════════════════════
+   DATA
+══════════════════════════════════════════════════════ */
+const PHASES = {
+  développement:{ color:'#30d158', bg:'#081208', border:'#163424', label:'Développement', weeks:[1,2,3,4] },
+  assimilation: { color:'#ffd60a', bg:'#141000', border:'#3a2e00', label:'Assimilation',   weeks:[5] },
+  spécifique:   { color:'#0a84ff', bg:'#050e1a', border:'#0e2a48', label:'Spécifique',     weeks:[6,7,8,9,10] },
+  affûtage:     { color:'#fc4c02', bg:'#140500', border:'#3c1200', label:'Affûtage',       weeks:[11,12] },
+};
+
+const ALLURES = {
+  EF:           { label:'Endurance Fondamentale', pace:"5'30–6'00/km", fc:'< 75% FCM',  color:'#30d158', desc:"Aisance totale, conversation possible. La base de tout.", effort:1, xp:30 },
+  FractionCourt:{ label:'Fractionné Court',        pace:"3'45–4'00/km", fc:'90–95% FCM', color:'#fc4c02', desc:"30/30 ou 200m–400m. Développe la vitesse pure.", effort:5, xp:80 },
+  FractionLong: { label:'Fractionné Long',          pace:"4'00–4'20/km", fc:'88–93% FCM', color:'#ff6b35', desc:"2 à 5 min à 90–95% VMA. Repousse la VO2max.", effort:4, xp:70 },
+  Seuil:        { label:'Seuil Anaérobie',          pace:"4'30–4'40/km", fc:'85–90% FCM', color:'#ffd60a', desc:"Effort continu soutenu 20–40 min. Séance clé.", effort:4, xp:70 },
+  Cote:         { label:'Côte / Renforcement',      pace:'Effort',        fc:'85–92% FCM', color:'#bf5af2', desc:"Répétitions en montée. Renforce les jambes.", effort:4, xp:60 },
+  AS21:         { label:'Allure Spécifique 20km',   pace:"4'10–4'20/km", fc:'83–88% FCM', color:'#0a84ff', desc:"Allure cible course. Grave le rythme dans les muscles.", effort:3, xp:90 },
+  SortieLongue: { label:'Sortie Longue',            pace:"5'20–5'45/km", fc:'70–78% FCM', color:'#34c759', desc:"EF progressif. Bâtit l'endurance et la résistance.", effort:2, xp:60 },
+  Deblocage:    { label:'Déblocage',                pace:"5'00–5'30/km", fc:'70–75% FCM', color:'#64d2ff', desc:"Footing très léger. Activation avant course.", effort:1, xp:40 },
+  Course:       { label:'COURSE 🏁',                pace:"4'15/km",       fc:'Objectif !', color:'#fc4c02', desc:"20km de Tours. Tout s'est construit pour ça.", effort:5, xp:500 },
+};
+const DAY = { mar:'Mardi', mer:'Mercredi', jeu:'Jeudi', sam:'Samedi', dim:'Dimanche' };
+
+const WEEKS = [
+  {num:1,phase:'développement',dates:'06/07–12/07',km:50,sessions:{mar:{type:'FractionCourt',detail:"15' EF + 10×(30s/30s) + 10' EF",km:8},mer:{type:'EF',detail:'Footing 45 min en aisance totale',km:8},jeu:{type:'AS21',detail:"15' EF + 4×1km à 4'15 (récup 90s) + 10' EF",km:10},sam:{type:'Seuil',detail:"15' EF + 20' au seuil (4'35/km) + 10' EF",km:9},dim:{type:'SortieLongue',detail:"1h10 à 5'40/km en EF progressif",km:12}}},
+  {num:2,phase:'développement',dates:'13/07–19/07',km:55,sessions:{mar:{type:'FractionLong',detail:"15' EF + 5×2min à 4'10 (récup 2min) + 10' EF",km:9},mer:{type:'EF',detail:"Footing 50 min + 6×20s d'accélération douce",km:9},jeu:{type:'AS21',detail:"15' EF + 3×2km à 4'15 (récup 2min) + 10' EF",km:12},sam:{type:'Cote',detail:"15' EF + 8×200m côte vigoureux + 10' EF",km:10},dim:{type:'SortieLongue',detail:"1h20 à 5'35/km – bords de Loire",km:14}}},
+  {num:3,phase:'développement',dates:'20/07–25/07',km:60,sessions:{mar:{type:'FractionCourt',detail:"15' EF + 2×(10×30/30) + 10' EF",km:10},mer:{type:'EF',detail:"Footing 55 min EF – récup active",km:10},jeu:{type:'AS21',detail:"15' EF + 4×2km à 4'15 (récup 90s) + 10' EF",km:13},sam:{type:'Seuil',detail:"15' EF + 3×10min seuil (récup 2min) + 10' EF",km:12},dim:{type:'SortieLongue',detail:"1h30 à 5'30 avec 20' à 5'00 en milieu",km:16}}},
+  {num:4,phase:'développement',dates:'27/07–02/08',km:65,sessions:{mar:{type:'FractionLong',detail:"15' EF + 4×3min à 4'05 (récup 2min) + 10' EF",km:11},mer:{type:'EF',detail:"Footing 55 min EF – jambes légères",km:10},jeu:{type:'AS21',detail:"15' EF + 2×3km à 4'15 (récup 3min) + 10' EF",km:13},sam:{type:'Cote',detail:"15' EF + 10×200m côte + 10' EF",km:12},dim:{type:'SortieLongue',detail:"1h40 à 5'30 avec 30' tempo (5'00) en fin",km:18}}},
+  {num:5,phase:'assimilation', dates:'03/08–09/08',km:45,sessions:{mar:{type:'FractionCourt',detail:"15' EF + 10×30/30 léger + 10' EF",km:8},mer:{type:'EF',detail:"Footing 40 min très léger",km:7},jeu:{type:'AS21',detail:"15' EF + 2×1km à 4'15 + 1×500m + 10' EF",km:8},sam:{type:'EF',detail:"Footing 40 min + 4×20s accélération",km:7},dim:{type:'SortieLongue',detail:"1h05 à 5'45 – terrain plat, récup",km:12}}},
+  {num:6,phase:'spécifique',   dates:'10/08–16/08',km:50,sessions:{mar:{type:'FractionCourt',detail:"15' EF + 12×30/30 à 3'45 + 10' EF",km:9},mer:{type:'EF',detail:"Footing 50 min EF – base aérobie",km:8},jeu:{type:'AS21',detail:"15' EF + 5×1km à 4'10 (récup 1min) + 10' EF",km:11},sam:{type:'Cote',detail:"20' EF + 10×200m côte max + 15' EF",km:11},dim:{type:'SortieLongue',detail:"1h20 à 5'20 avec 3×10min à 4'45 + retour EF",km:16}}},
+  {num:7,phase:'spécifique',   dates:'17/08–23/08',km:55,sessions:{mar:{type:'FractionLong',detail:"15' EF + 5×3min à 4'05 (récup 90s) + 10' EF",km:10},mer:{type:'EF',detail:"Footing 50 min EF – récup qualitative",km:9},jeu:{type:'AS21',detail:"15' EF + 3×2km à 4'10 (récup 2min) + 10' EF",km:12},sam:{type:'Seuil',detail:"15' EF + 25' continu à 4'35 + 10' EF",km:11},dim:{type:'SortieLongue',detail:"1h30 à 5'20 avec 20' à 4'45 en milieu",km:17}}},
+  {num:8,phase:'spécifique',   dates:'24/08–30/08',km:60,sessions:{mar:{type:'FractionCourt',detail:"15' EF + 15×30/30 à 3'45 + 10' EF",km:10},mer:{type:'EF',detail:"Footing 55 min EF",km:9},jeu:{type:'AS21',detail:"15' EF + 4×2km à 4'10 (récup 90s) + 10' EF ⚡",km:14},sam:{type:'Cote',detail:"20' EF + 12×200m côte + 15' EF",km:12},dim:{type:'SortieLongue',detail:"1h40 à 5'20 avec 4×8min à 4'30 + fin EF",km:18}}},
+  {num:9,phase:'spécifique',   dates:'31/08–06/09',km:65,sessions:{mar:{type:'FractionLong',detail:"15' EF + 4×4min à 4'05 (récup 90s) + 10' EF",km:11},mer:{type:'EF',detail:"Footing 55 min EF",km:9},jeu:{type:'AS21',detail:"15' EF + 1×5km à 4'15 + 10' EF – simulation !",km:14},sam:{type:'Seuil',detail:"15' EF + 30' à 4'30 + 10' EF",km:13},dim:{type:'SortieLongue',detail:"1h45 à 5'15 avec 30' à 4'40 ⭐ séance clé",km:20}}},
+  {num:10,phase:'spécifique',  dates:'07/09–13/09',km:70,sessions:{mar:{type:'FractionCourt',detail:"15' EF + 20×30/30 en 2×10 (récup 3min) + 10' EF",km:12},mer:{type:'EF',detail:"Footing 60 min – volume max",km:10},jeu:{type:'AS21',detail:"15' EF + 2×4km à 4'15 (récup 3min) + 10' EF ⭐",km:16},sam:{type:'Cote',detail:"20' EF + 10×300m côte fort + 15' EF",km:13},dim:{type:'SortieLongue',detail:"1h50 à 5'15 avec 40' à 4'40 + 15' EF 🔥 pic",km:22}}},
+  {num:11,phase:'affûtage',    dates:'14/09–20/09',km:40,sessions:{mar:{type:'FractionCourt',detail:"15' EF + 8×30/30 à 3'45 + 10' EF",km:7},mer:{type:'EF',detail:"Footing 35 min – volume réduit",km:6},jeu:{type:'AS21',detail:"15' EF + 3×1km à 4'10 + 10' EF – rappel allure",km:8},sam:{type:'Seuil',detail:"15' EF + 15' seuil + 10' EF",km:7},dim:{type:'SortieLongue',detail:"1h00 à 5'30 – dernière longue",km:11}}},
+  {num:12,phase:'affûtage',    dates:'21/09–27/09',km:40,sessions:{mar:{type:'FractionCourt',detail:"15' EF + 6×30/30 + 10' EF – fraîcheur !",km:6},mer:{type:'EF',detail:"Footing 30 min très léger",km:5},jeu:{type:'AS21',detail:"15' EF + 2×1km à 4'10 + 10' EF",km:6},sam:{type:'Deblocage',detail:"20 min léger + 4×100m accélération douce",km:5},dim:{type:'Course',detail:"🏁 20km de Tours – OBJECTIF 4'15/km = 1h25'00 !",km:20}}},
+];
+
+const LEVELS = [
+  {min:0,   title:'Débutant',    icon:'🏃', color:'#8e8e93'},
+  {min:200, title:'Régulier',    icon:'⚡', color:'#0a84ff'},
+  {min:500, title:'Entraîné',    icon:'🔥', color:'#ffd60a'},
+  {min:1000,title:'Performeur',  icon:'💪', color:'#30d158'},
+  {min:2000,title:'Compétiteur', icon:'🎯', color:'#bf5af2'},
+  {min:3000,title:'Elite',       icon:'🏆', color:'#fc4c02'},
+];
+const BADGES = [
+  {id:'b1',  ico:'👟', name:'Premier Pas',     desc:'1ère séance validée',          ok:(n)=>n>=1},
+  {id:'b2',  ico:'📅', name:'Semaine 1',        desc:'Semaine 1 complète',           ok:(n,d)=>wFull(1,d)},
+  {id:'b3',  ico:'🔥', name:'On Fire',          desc:'10 séances validées',          ok:(n)=>n>=10},
+  {id:'b4',  ico:'⚡', name:'Quart de route',  desc:'25 séances validées',          ok:(n)=>n>=25},
+  {id:'b5',  ico:'🎯', name:'Mi-Chemin',        desc:'30 séances validées',          ok:(n)=>n>=30},
+  {id:'b6',  ico:'💨', name:'Fraction Master', desc:'10 fracs court validés',       ok:(n,d)=>cT(d,'FractionCourt')>=10},
+  {id:'b7',  ico:'🗺️', name:'Grand Marcheur',  desc:'5 sorties longues',            ok:(n,d)=>cT(d,'SortieLongue')>=5},
+  {id:'b8',  ico:'⚔️', name:'Guerrier Seuil',  desc:'5 séances seuil',              ok:(n,d)=>cT(d,'Seuil')>=5},
+  {id:'b9',  ico:'🎽', name:'Expert Allure',   desc:'8 séances AS21',               ok:(n,d)=>cT(d,'AS21')>=8},
+  {id:'b10', ico:'🌱', name:'Phase Dév.',       desc:'Développement terminé',        ok:(n,d)=>phFull('développement',d)},
+  {id:'b11', ico:'😤', name:'Assimilé',         desc:'Assimilation terminée',        ok:(n,d)=>phFull('assimilation',d)},
+  {id:'b12', ico:'🚀', name:'Spécialiste',      desc:'Phase spécifique terminée',    ok:(n,d)=>phFull('spécifique',d)},
+  {id:'b13', ico:'📆', name:'3 de suite',       desc:'3 séances consécutives',       ok:(n,d)=>maxStreak(d)>=3},
+  {id:'b14', ico:'🌟', name:'Sem. Parfaite',    desc:'5 séances consécutives',       ok:(n,d)=>maxStreak(d)>=5},
+  {id:'b15', ico:'👑', name:'CHAMPION',         desc:'60/60 séances complètes',      ok:(n)=>n>=60},
+];
+const CHALLENGES = [
+  {id:'c1',ico:'📅',title:'Semaine sans faute',  desc:'5 séances cette semaine',     tgt:5,   xp:200, val:(d)=>currWk(d)},
+  {id:'c2',ico:'🗺️',title:'100 km au compteur', desc:'100 km courus au total',       tgt:100, xp:300, val:(d)=>Math.min(100,kmDone(d))},
+  {id:'c3',ico:'💨',title:'Sprint Series',        desc:'5 fracs court validés',        tgt:5,   xp:150, val:(d)=>cT(d,'FractionCourt')},
+  {id:'c4',ico:'🎯',title:'Trente Séances',       desc:'30 séances validées',          tgt:30,  xp:400, val:(d)=>Object.values(d).filter(Boolean).length},
+];
+const TOTAL = WEEKS.reduce((a,w)=>a+Object.keys(w.sessions).length,0);
+
+/* ══════════════════════════════════════════════════════
+   HELPERS
+══════════════════════════════════════════════════════ */
+const getPhase = w => Object.entries(PHASES).find(([,p])=>p.weeks.includes(w.num))[0];
+const wFull = (n,d) => { const w=WEEKS.find(x=>x.num===n); return w&&Object.keys(w.sessions).every(dy=>d[`${n}-${dy}`]); };
+const cT = (d,t) => WEEKS.reduce((a,w)=>a+Object.entries(w.sessions).filter(([dy,s])=>s.type===t&&d[`${w.num}-${dy}`]).length,0);
+const phFull = (ph,d) => PHASES[ph].weeks.every(n=>wFull(n,d));
+const wStat = (w,d) => { const k=Object.keys(w.sessions).map(dy=>`${w.num}-${dy}`); const dn=k.filter(x=>d[x]).length; return dn===0?'none':dn===k.length?'done':'partial'; };
+const kmDone = d => WEEKS.reduce((a,w)=>a+Object.entries(w.sessions).reduce((b,[dy,s])=>d[`${w.num}-${dy}`]?b+s.km:b,0),0);
+const currWk = d => { const w=WEEKS[selW-1]; return Object.keys(w.sessions).filter(dy=>d[`${w.num}-${dy}`]).length; };
+const xpTotal = d => WEEKS.reduce((a,w)=>a+Object.entries(w.sessions).reduce((b,[dy,s])=>d[`${w.num}-${dy}`]?b+(ALLURES[s.type]?.xp||50):b,0),0);
+const getLv = xp => { for(let i=LEVELS.length-1;i>=0;i--) if(xp>=LEVELS[i].min) return {idx:i,...LEVELS[i]}; return {idx:0,...LEVELS[0]}; };
+const maxStreak = d => { let s=0,mx=0; WEEKS.forEach(w=>Object.keys(w.sessions).forEach(dy=>{ if(d[`${w.num}-${dy}`]){s++;mx=Math.max(mx,s)}else s=0; })); return mx; };
+const cdDays = () => Math.max(0,Math.ceil((new Date('2026-09-27')-new Date())/864e5));
+const unlocked = d => { const n=Object.values(d).filter(Boolean).length; return BADGES.filter(b=>b.ok(n,d)); };
+
+/* ══════════════════════════════════════════════════════
+   STATE
+══════════════════════════════════════════════════════ */
+let done={};
+try { done=JSON.parse(localStorage.getItem('t20k_v2')||'{}'); } catch(e){}
+let selW=1, view='home', prevBadges=new Set(unlocked(done).map(b=>b.id));
+const save = () => { try{localStorage.setItem('t20k_v2',JSON.stringify(done));}catch(e){} };
+
+/* ══════════════════════════════════════════════════════
+   CELEBRATION ENGINE
+══════════════════════════════════════════════════════ */
+const CONF_COLORS = ['#fc4c02','#30d158','#0a84ff','#ffd60a','#ff375f','#bf5af2','#ff9f0a'];
+
+function celebrate(x, y, isMega=false) {
+  const cel = document.getElementById('celebration');
+  cel.innerHTML = '';
+  cel.classList.add('active');
+
+  const cx = x || window.innerWidth/2;
+  const cy = y || window.innerHeight/2;
+
+  // Shockwaves
+  const waves = isMega ? 3 : 1;
+  for(let i=0; i<waves; i++) {
+    const sw = document.createElement('div');
+    sw.className = 'shock';
+    sw.style.cssText = `left:${cx}px;top:${cy}px;width:80px;height:80px;animation-delay:${i*0.15}s;border-color:${CONF_COLORS[i%CONF_COLORS.length]}`;
+    cel.appendChild(sw);
+  }
+
+  // Stars burst from click point
+  const starEmojis = ['⭐','✨','💥','🔥','⚡'];
+  const starCount = isMega ? 8 : 5;
+  for(let i=0; i<starCount; i++) {
+    const angle = (i/starCount)*2*Math.PI;
+    const dist = 60+Math.random()*60;
+    const tx = Math.cos(angle)*dist, ty = Math.sin(angle)*dist;
+    const s = document.createElement('div');
+    s.className = 'star';
+    s.style.cssText = `left:${cx}px;top:${cy}px;--tx:${tx}px;--ty:${ty}px;animation-duration:${0.5+Math.random()*.4}s;animation-delay:${i*0.04}s;font-size:${14+Math.random()*12}px`;
+    s.textContent = starEmojis[i%starEmojis.length];
+    cel.appendChild(s);
+  }
+
+  // Confetti rain
+  const confCount = isMega ? 60 : 30;
+  for(let i=0; i<confCount; i++) {
+    const c = document.createElement('div');
+    c.className = 'conf';
+    const startX = isMega ? Math.random()*window.innerWidth : cx + (Math.random()-0.5)*160;
+    c.style.cssText = `
+      left:${startX}px; top:${isMega?-10:cy-20}px;
+      background:${CONF_COLORS[Math.floor(Math.random()*CONF_COLORS.length)]};
+      width:${6+Math.random()*6}px; height:${6+Math.random()*8}px;
+      border-radius:${Math.random()>0.5?'50%':'2px'};
+      animation-duration:${0.8+Math.random()*1.2}s;
+      animation-delay:${Math.random()*0.4}s;
+      transform:rotate(${Math.random()*360}deg);
+    `;
+    cel.appendChild(c);
+  }
+
+  setTimeout(()=>{ cel.classList.remove('active'); cel.innerHTML=''; }, isMega?2000:1200);
+}
+
+/* ══════════════════════════════════════════════════════
+   TOAST
+══════════════════════════════════════════════════════ */
+let toastTimer;
+function showToast(ico, msg) {
+  const t=document.getElementById('toast');
+  document.getElementById('t-ico').textContent=ico;
+  document.getElementById('t-msg').textContent=msg;
+  t.classList.remove('out'); t.classList.add('in');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>{ t.classList.remove('in'); t.classList.add('out'); },3000);
+}
+
+function xpPop(xp, el) {
+  const r=el.getBoundingClientRect();
+  const p=document.createElement('div');
+  p.className='xp-float';
+  p.textContent=`+${xp} XP`;
+  p.style.cssText=`left:${r.left+r.width/2-24}px;top:${r.top-10}px`;
+  document.body.appendChild(p);
+  setTimeout(()=>p.remove(),1100);
+}
+
+/* ══════════════════════════════════════════════════════
+   APPLE WATCH RINGS SVG
+══════════════════════════════════════════════════════ */
+function makeRings(pct1, pct2, pct3) {
+  const size=120, cx=60, cy=60;
+  const radii=[44,33,22];
+  const colors=['var(--ring1)','var(--ring2)','var(--ring3)'];
+  const pcts=[pct1,pct2,pct3];
+  const labels=['Séances','Semaine','XP Niveau'];
+
+  let circles='';
+  radii.forEach((r,i)=>{
+    const circ=2*Math.PI*r;
+    const offset=circ*(1-Math.min(pcts[i],1));
+    const glowId=`glow${i}`;
+    circles+=`
+      <defs>
+        <filter id="${glowId}" x="-20%" y="-20%" width="140%" height="140%">
+          <feGaussianBlur stdDeviation="2" result="blur"/>
+          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+      </defs>
+      <!-- Track -->
+      <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${colors[i]}" stroke-width="7" opacity=".15"/>
+      <!-- Progress -->
+      <circle cx="${cx}" cy="${cy}" r="${r}" fill="none"
+        stroke="${colors[i]}" stroke-width="7"
+        stroke-dasharray="${circ}" stroke-dashoffset="${offset}"
+        stroke-linecap="round"
+        filter="url(#${glowId})"
+        style="transform:rotate(-90deg);transform-origin:${cx}px ${cy}px;transition:stroke-dashoffset 1.2s cubic-bezier(.4,0,.2,1) ${i*0.15}s"/>
+      <!-- End cap glow -->
+      ${pcts[i]>0.02?`<circle cx="${cx}" cy="${cy-r}" r="4" fill="${colors[i]}" opacity=".9"
+        style="transform:rotate(${(pcts[i])*360-90}deg);transform-origin:${cx}px ${cy}px;transition:transform 1.2s cubic-bezier(.4,0,.2,1) ${i*0.15}s"/>`:``}
+    `;
+  });
+
+  const overall=Math.round((pct1+pct2+pct3)/3*100);
+
+  return `
+    <div class="rings-card" style="background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:20px 16px;display:flex;align-items:center;gap:20px">
+      <div class="rings-svg-wrap">
+        <svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">${circles}</svg>
+        <div class="rings-center-text">
+          <div class="rings-pct-big">${overall}%</div>
+          <div class="rings-pct-sub">global</div>
+        </div>
+      </div>
+      <div class="rings-legend">
+        ${[0,1,2].map(i=>`
+          <div class="ring-legend-row">
+            <div class="ring-dot" style="background:${colors[i]}"></div>
+            <div class="ring-legend-label">${labels[i]}</div>
+            <div class="ring-legend-val" style="color:${colors[i]}">${Math.round(pcts[i]*100)}%</div>
+          </div>`).join('')}
+      </div>
+    </div>`;
+}
+
+/* ══════════════════════════════════════════════════════
+   MINI RING (week header)
+══════════════════════════════════════════════════════ */
+function miniRing(pct, color, size=56) {
+  const r=size/2-5, cx=size/2, cy=size/2, circ=2*Math.PI*r;
+  const off=circ*(1-Math.min(pct/100,1));
+  return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
+    <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${color}" stroke-width="5" opacity=".15"/>
+    <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${color}" stroke-width="5"
+      stroke-dasharray="${circ}" stroke-dashoffset="${off}" stroke-linecap="round"
+      style="transform:rotate(-90deg);transform-origin:${cx}px ${cy}px;transition:stroke-dashoffset .8s cubic-bezier(.4,0,.2,1)"/>
+    <text x="${cx}" y="${cy+1}" text-anchor="middle" dominant-baseline="middle"
+      font-family="Barlow Condensed,sans-serif" font-weight="800" font-size="${size/4}"
+      fill="${color}">${Math.round(pct)}%</text>
+  </svg>`;
+}
+
+/* ══════════════════════════════════════════════════════
+   RENDER HEADER
+══════════════════════════════════════════════════════ */
+function renderHeader() {
+  const xp=xpTotal(done), lv=getLv(xp), nxt=LEVELS[Math.min(lv.idx+1,LEVELS.length-1)];
+  const pct=lv.idx===LEVELS.length-1?100:Math.round(((xp-lv.min)/(nxt.min-lv.min))*100);
+  document.getElementById('hdrLv').textContent=`${lv.icon} LVL ${lv.idx+1}`;
+  document.getElementById('hdrLv').style.background=lv.color;
+  document.getElementById('xpBar').style.width=`${pct}%`;
+  document.getElementById('xpNums').textContent=`${xp} / ${nxt.min} XP`;
+
+  const sk=maxStreak(done);
+  const allK=[]; WEEKS.forEach(w=>Object.keys(w.sessions).forEach(dy=>allK.push(`${w.num}-${dy}`)));
+  const last7=allK.slice(-7);
+  const dl=['L','M','M','J','V','S','D'];
+  document.getElementById('streakRow').innerHTML=`
+    <div class="streak-flame">🔥</div>
+    <div class="streak-text">${sk}</div>
+    <div class="streak-label">séances consécutives</div>
+    <div class="streak-dots">
+      ${last7.map((k,i)=>`<div class="s-dot ${done[k]?'on':i===last7.length-1?'cur':''}">${done[k]?'✓':dl[i]}</div>`).join('')}
+    </div>`;
+}
+
+/* ══════════════════════════════════════════════════════
+   RENDER HOME
+══════════════════════════════════════════════════════ */
+function renderHome() {
+  document.getElementById('cdDays').textContent = cdDays();
+
+  // Rings pcts
+  const cnt=Object.values(done).filter(Boolean).length;
+  const xp=xpTotal(done), lv=getLv(xp), nxt=LEVELS[Math.min(lv.idx+1,LEVELS.length-1)];
+  const xpPct=lv.idx===LEVELS.length-1?1:Math.min(1,(xp-lv.min)/(nxt.min-lv.min));
+  const w=WEEKS[selW-1];
+  const wk=Object.keys(w.sessions).map(dy=>`${w.num}-${dy}`);
+  const wDn=wk.filter(k=>done[k]).length;
+  document.getElementById('ringsCard').outerHTML = ''; // will be replaced below
+  document.querySelector('.rings-section').innerHTML = makeRings(cnt/TOTAL, wDn/wk.length, xpPct);
+
+  // Next undone session
+  let ns=null,nw=null,nd=null;
+  outer:for(const ww of WEEKS) for(const [dy,s] of Object.entries(ww.sessions)) { if(!done[`${ww.num}-${dy}`]){ns=s;nw=ww;nd=dy;break outer;} }
+  const a=ns?ALLURES[ns.type]:null;
+  document.getElementById('nextCard').innerHTML = ns
+    ? `<div class="next-card live" style="padding-left:20px">
+        <div class="next-accent" style="background:${a.color}"></div>
+        <div class="next-eyebrow">S${nw.num} · ${DAY[nd]}</div>
+        <div class="next-type" style="color:${a.color}">${a.label}</div>
+        <div class="next-detail">${ns.detail}</div>
+        <div class="next-pills">
+          <span class="npill hot">${a.pace}</span>
+          <span class="npill">${a.fc}</span>
+          <span class="npill">${ns.km} km</span>
+          <span class="npill">+${a.xp} XP</span>
+        </div>
+      </div>`
+    : `<div class="next-card"><div class="next-type" style="color:var(--green)">🎉 Programme complet !</div></div>`;
+
+  // Global
+  const km=kmDone(done), gp=Math.round((cnt/TOTAL)*100);
+  document.getElementById('gProgCard').innerHTML = `
+    <div class="gprog-header">
+      <div class="gprog-title">12 semaines · 60 séances</div>
+      <div class="gprog-pct">${gp}%</div>
+    </div>
+    <div class="gprog-stats">
+      <div class="gpstat"><div class="gpstat-val">${cnt}</div><div class="gpstat-lbl">séances</div></div>
+      <div class="gpstat"><div class="gpstat-val" style="color:var(--green)">${km}</div><div class="gpstat-lbl">km courus</div></div>
+      <div class="gpstat"><div class="gpstat-val" style="color:var(--orange)">${xpTotal(done)}</div><div class="gpstat-lbl">XP</div></div>
+    </div>
+    <div class="prog-bar"><div class="prog-fill" style="width:${gp}%;background:linear-gradient(90deg,var(--orange),#ff6b35)"></div></div>`;
+}
+
+/* ══════════════════════════════════════════════════════
+   RENDER PLAN
+══════════════════════════════════════════════════════ */
+function renderChips() {
+  const el=document.getElementById('wkChips');
+  el.innerHTML=WEEKS.map(w=>`<button class="wk-chip ${selW===w.num?'active':''}" data-w="${w.num}" data-s="${wStat(w,done)}"><span class="wk-dot"></span>S${w.num}</button>`).join('');
+  el.querySelectorAll('.wk-chip').forEach(b=>b.addEventListener('click',()=>{selW=+b.dataset.w;renderPlan();}));
+  const act=el.querySelector('.wk-chip.active');
+  if(act) act.scrollIntoView({behavior:'smooth',inline:'center',block:'nearest'});
+}
+
+function renderPlan() {
+  renderChips();
+  const w=WEEKS[selW-1], ph=getPhase(w), p=PHASES[ph];
+  const wk=Object.keys(w.sessions).map(dy=>`${w.num}-${dy}`);
+  const wDn=wk.filter(k=>done[k]).length, wpct=Math.round((wDn/wk.length)*100);
+  const wxp=Object.entries(w.sessions).reduce((a,[dy,s])=>a+(done[`${w.num}-${dy}`]?(ALLURES[s.type]?.xp||50):0),0);
+  const mxp=Object.values(w.sessions).reduce((a,s)=>a+(ALLURES[s.type]?.xp||50),0);
+
+  document.getElementById('planBody').innerHTML = `
+    <!-- Week header -->
+    <div class="wk-hdr su" style="background:${p.bg};border-color:${p.border}">
+      <div class="wk-hdr-top">
+        <div>
+          <div class="wk-hdr-title" style="color:${p.color}">Semaine ${w.num}</div>
+          <div class="wk-hdr-date">${w.dates}</div>
+        </div>
+        <div class="wk-km">
+          <div class="wk-km-num" style="color:${p.color}">${w.km}</div>
+          <div class="wk-km-lbl">km/sem.</div>
+        </div>
+      </div>
+      <div class="wk-hdr-bottom">
+        <div class="wk-mini-ring">${miniRing(wpct,p.color)}</div>
+        <div class="wk-prog-info">
+          <div class="wk-prog-row">
+            <span class="wk-prog-lbl">${wDn}/${wk.length} séances</span>
+            <span class="wk-prog-val" style="color:${p.color}">${wxp}/${mxp} XP</span>
+          </div>
+          <div class="wk-prog-bar"><div class="wk-prog-fill" style="width:${wpct}%;background:${p.color}"></div></div>
+        </div>
+      </div>
+    </div>
+    <!-- Sessions -->
+    ${Object.entries(w.sessions).map(([dy,s],i)=>{
+      const a=ALLURES[s.type], k=`${w.num}-${dy}`, dn=!!done[k], isr=s.type==='Course';
+      return `<div class="sess ${isr?'is-race':''} ${dn?'done':''} su su${Math.min(i+1,4)}" style="--tc:${a.color}">
+        <div class="sess-head">
+          <span class="sess-day">${DAY[dy]}</span>
+          <div class="sess-right">
+            <span class="sess-xp">+${a.xp} XP</span>
+            <span class="sess-km">${s.km} km</span>
+            <button class="chkbox ${dn?'on':''} ${isr?'race':''}" data-k="${k}" data-xp="${a.xp}" data-x="0" data-y="0">✓</button>
+          </div>
+        </div>
+        <div class="sess-type" style="color:${dn?'var(--green)':a.color}">${dn?'✓ ':''}${a.label}</div>
+        <div class="sess-detail">${s.detail}</div>
+        <div class="sess-pills">
+          <span class="sp" style="color:${dn?'var(--green)':a.color};border-color:${dn?'var(--green)':a.color}">${a.pace}</span>
+          <span class="sp sp-fc">${a.fc}</span>
+        </div>
+      </div>`;
+    }).join('')}`;
+
+  document.getElementById('planBody').querySelectorAll('.chkbox').forEach(btn=>{
+    btn.addEventListener('click', e=>{
+      e.stopPropagation();
+      const k=btn.dataset.k, was=!!done[k];
+      done[k]=!done[k]; if(!done[k]) delete done[k];
+      save();
+
+      if(!was) {
+        // XP popup
+        xpPop(btn.dataset.xp, btn);
+        // Get click position
+        const r=btn.getBoundingClientRect();
+        const cx=r.left+r.width/2, cy=r.top+r.height/2;
+        // Check if week complete → mega celebration
+        const ww=WEEKS[selW-1];
+        const allDone=Object.keys(ww.sessions).every(dy=>done[`${ww.num}-${dy}`]);
+        if(allDone) {
+          setTimeout(()=>celebrate(cx,cy,true),100);
+          setTimeout(()=>showToast('🎉',`Semaine ${ww.num} complète ! 🔥`),200);
+        } else {
+          celebrate(cx,cy,false);
+        }
+      }
+      checkBadges();
+      renderAll();
+    });
+  });
+}
+
+/* ══════════════════════════════════════════════════════
+   RENDER STATS
+══════════════════════════════════════════════════════ */
+function renderStats() {
+  const cnt=Object.values(done).filter(Boolean).length, km=kmDone(done);
+  const xp=xpTotal(done), sk=maxStreak(done);
+  document.getElementById('statGrid').innerHTML=[
+    {ico:'🏅',lbl:'Séances validées',val:`${cnt} / ${TOTAL}`,hl:false},
+    {ico:'🗺️',lbl:'Km courus',        val:`${km} km`,          hl:true},
+    {ico:'⚡',lbl:'XP Total',         val:`${xp}`,              hl:true},
+    {ico:'🔥',lbl:'Streak max',       val:`${sk}`,              hl:false},
+  ].map(s=>`<div class="stat-card ${s.hl?'accent':''}"><div class="stat-icon">${s.ico}</div><div class="stat-val">${s.val}</div><div class="stat-lbl">${s.lbl}</div></div>`).join('');
+
+  document.getElementById('volBars').innerHTML=WEEKS.map(w=>{
+    const p=PHASES[getPhase(w)], act=selW===w.num;
+    return`<div class="vol-col" data-w="${w.num}">
+      <div class="vol-b" style="flex:${w.km/70};background:${act?p.color:p.color+'55'}"></div>
+      <span class="vol-l">S${w.num}</span>
+    </div>`;
+  }).join('');
+  document.getElementById('volBars').querySelectorAll('.vol-col').forEach(el=>
+    el.addEventListener('click',()=>{selW=+el.dataset.w;switchView('plan');}));
+
+  document.getElementById('phaseRows').innerHTML=Object.entries(PHASES).map(([k,p])=>{
+    const pw=WEEKS.filter(w=>p.weeks.includes(w.num));
+    const tot=pw.reduce((a,w)=>a+Object.keys(w.sessions).length,0);
+    const dn=pw.reduce((a,w)=>a+Object.keys(w.sessions).filter(dy=>done[`${w.num}-${dy}`]).length,0);
+    const pct=tot?Math.round((dn/tot)*100):0;
+    const pxp=pw.reduce((a,w)=>a+Object.entries(w.sessions).reduce((b,[dy,s])=>done[`${w.num}-${dy}`]?b+(ALLURES[s.type]?.xp||50):b,0),0);
+    return`<div class="phase-row">
+      <div class="ph-head">
+        <div class="ph-name" style="color:${p.color}">${p.label}</div>
+        <div style="text-align:right">
+          <div class="ph-pct" style="color:${p.color}">${pct}%</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3)">${pxp} XP</div>
+        </div>
+      </div>
+      <div class="ph-bar"><div class="ph-fill" style="width:${pct}%;background:${p.color}"></div></div>
+    </div>`;
+  }).join('');
+}
+
+/* ══════════════════════════════════════════════════════
+   RENDER BADGES
+══════════════════════════════════════════════════════ */
+function renderBadges() {
+  const cnt=Object.values(done).filter(Boolean).length, xp=xpTotal(done);
+  const lv=getLv(xp), nxt=LEVELS[Math.min(lv.idx+1,LEVELS.length-1)];
+  const pct=lv.idx===LEVELS.length-1?100:Math.round(((xp-lv.min)/(nxt.min-lv.min))*100);
+  const ul=unlocked(done), ulIds=new Set(ul.map(b=>b.id));
+
+  document.getElementById('lvCard').innerHTML=`
+    <div class="lv-card">
+      <span class="lv-emoji">${lv.icon}</span>
+      <div class="lv-name" style="color:${lv.color}">${lv.title}</div>
+      <div class="lv-sub">Niveau ${lv.idx+1} · ${xp} XP · ${ul.length}/${BADGES.length} badges</div>
+      <div class="lv-xp-row">
+        <span class="lv-xp-lbl">${xp} XP</span>
+        <span class="lv-xp-lbl">${lv.idx<LEVELS.length-1?nxt.min+' XP → Nv.'+(lv.idx+2):'NIVEAU MAX !'}</span>
+      </div>
+      <div class="lv-track"><div class="lv-fill" style="width:${pct}%"></div></div>
+    </div>`;
+
+  document.getElementById('bgGrid').innerHTML=BADGES.map(b=>{
+    const got=ulIds.has(b.id);
+    return`<div class="bg-cell ${got?'got':'nope'}">
+      <span class="bg-emoji">${b.ico}</span>
+      <div class="bg-name">${b.name}</div>
+      <div class="bg-desc">${b.desc}</div>
+      <div class="bg-unlock">✓ DÉBLOQUÉ</div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('chCards').innerHTML=CHALLENGES.map(ch=>{
+    const pg=ch.val(done), pct=Math.min(100,Math.round((pg/ch.tgt)*100)), dn=pg>=ch.tgt;
+    return`<div class="ch-card">
+      <div class="ch-row">
+        <div class="ch-ico">${ch.ico}</div>
+        <div class="ch-info">
+          <div class="ch-title" ${dn?'style="color:var(--green)"':''}>${dn?'✓ ':''}${ch.title}</div>
+          <div class="ch-desc">${ch.desc}</div>
+        </div>
+        <div class="ch-rew"><div class="ch-xp">+${ch.xp}</div><div class="ch-xpl">XP</div></div>
+      </div>
+      <div class="ch-prow"><span class="ch-pl">${pg} / ${ch.tgt}</span><span class="ch-pv">${pct}%</span></div>
+      <div class="ch-bar"><div class="ch-fill" style="width:${pct}%;background:${dn?'var(--green)':'var(--orange)'}"></div></div>
+    </div>`;
+  }).join('');
+}
+
+/* ══════════════════════════════════════════════════════
+   RENDER ALLURES
+══════════════════════════════════════════════════════ */
+function renderAllures() {
+  document.getElementById('alCards').innerHTML=Object.entries(ALLURES).map(([k,a])=>{
+    const bars=Array.from({length:5},(_,i)=>`<div class="al-bar" style="height:${(i+1)*4}px;background:${i<a.effort?a.color:'#282828'}"></div>`).join('');
+    return`<div class="al-card">
+      <div class="al-stripe" style="background:${a.color}"></div>
+      <div class="al-body">
+        <div class="al-key" style="color:${a.color}">${k}</div>
+        <div class="al-pace" style="color:${a.color}">${a.pace}</div>
+        <div class="al-fc">${a.fc}</div>
+        <div class="al-desc">${a.desc}</div>
+      </div>
+      <div class="al-right">${bars}</div>
+    </div>`;
+  }).join('');
+}
+
+/* ══════════════════════════════════════════════════════
+   BADGE CHECK
+══════════════════════════════════════════════════════ */
+function checkBadges() {
+  const cur=unlocked(done);
+  cur.forEach(b=>{ if(!prevBadges.has(b.id)) { setTimeout(()=>{showToast(b.ico,`Badge : ${b.name} !`); celebrate(window.innerWidth/2,120,true);},500); } });
+  prevBadges=new Set(cur.map(b=>b.id));
+}
+
+/* ══════════════════════════════════════════════════════
+   NAVIGATION
+══════════════════════════════════════════════════════ */
+function switchView(name) {
+  view=name;
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById(`view-${name}`).classList.add('active');
+  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+  document.querySelector(`[data-v="${name}"]`).classList.add('active');
+  document.getElementById('content').scrollTop=0;
+  if(name==='stats') renderStats();
+  else if(name==='badges') renderBadges();
+  else if(name==='plan') renderPlan();
+  else if(name==='home') renderHome();
+}
+document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>switchView(b.dataset.v)));
+
+function renderAll() {
+  renderHeader();
+  if(view==='home') renderHome();
+  else if(view==='plan') renderPlan();
+  else if(view==='stats') renderStats();
+  else if(view==='badges') renderBadges();
+}
+
+/* ══════════════════════════════════════════════════════
+   INIT
+══════════════════════════════════════════════════════ */
+if('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(()=>{});
+renderAllures();
+renderAll();
+</script>
+</body>
+</html>

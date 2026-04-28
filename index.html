@@ -14,14 +14,39 @@
 <style>
 /* ── TOKENS ── */
 :root{
+  /* Accent — fixed */
   --o:#fc4c02;--o2:#ff6b35;--obg:rgba(252,76,2,.12);
-  --bg:#080808;--text:#f0f0f0;--t2:#888;--t3:#3a3a3a;
   --green:#30d158;--blue:#0a84ff;--yellow:#ffd60a;--purple:#bf5af2;
-  /* Safe areas: set by JS on load for accuracy on all iPhones */
-  --st:47px;   /* overridden by JS */
-  --sb:34px;   /* overridden by JS */
   --tab:56px;--r:14px;
+  /* Dark mode (default) */
+  --bg:#080808;--bg2:#101010;--bg3:#181818;
+  --text:#f0f0f0;--t2:#888;--t3:#444;
+  --card:rgba(255,255,255,.04);--card-border:rgba(255,255,255,.09);
+  --card-shine:rgba(255,255,255,.06);--card-shadow:rgba(0,0,0,.45);
+  --hdr-bg:rgba(8,8,8,.92);--hdr-border:rgba(255,255,255,.06);
+  --tab-bg:rgba(8,8,8,.88);--tab-border:rgba(255,255,255,.07);
+  --streak-bg:rgba(252,76,2,.09);
+  --input-border:rgba(255,255,255,.1);--input-bg:rgba(255,255,255,.08);
+  --glow-o:rgba(252,76,2,.06);--glow-b:rgba(10,132,255,.05);--glow-g:rgba(48,209,88,.04);
+  --xp-track:rgba(255,255,255,.12);
 }
+/* Light mode overrides */
+:root.light{
+  --bg:#f2f2f7;--bg2:#ffffff;--bg3:#e5e5ea;
+  --text:#1c1c1e;--t2:#6d6d72;--t3:#aeaeb2;
+  --card:rgba(255,255,255,.72);--card-border:rgba(0,0,0,.08);
+  --card-shine:rgba(255,255,255,.9);--card-shadow:rgba(0,0,0,.1);
+  --hdr-bg:rgba(242,242,247,.92);--hdr-border:rgba(0,0,0,.08);
+  --tab-bg:rgba(242,242,247,.92);--tab-border:rgba(0,0,0,.1);
+  --streak-bg:rgba(252,76,2,.07);
+  --input-border:rgba(0,0,0,.12);--input-bg:rgba(0,0,0,.05);
+  --glow-o:rgba(252,76,2,.04);--glow-b:rgba(10,132,255,.03);--glow-g:rgba(48,209,88,.03);
+  --xp-track:rgba(0,0,0,.1);
+}
+/* Smooth transition on mode switch */
+*{transition:background-color .3s ease,border-color .3s ease,color .18s ease,box-shadow .3s ease}
+.chkbox,.chkbox.on,.tab,.lv-pill,.xp-fi,.prog-fill,.phase-fill,.wkh-fill,.ph-fill,.ch-fi,.vbar,.lv-fi,.sk-d,.sk-d.on{transition:all .2s ease}
+canvas,svg,img{transition:none}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html{height:100%;height:-webkit-fill-available}
 body{
@@ -29,39 +54,57 @@ body{
   overflow:hidden;background:var(--bg);color:var(--text);
   font-family:'Barlow',sans-serif;-webkit-font-smoothing:antialiased;
   background-image:
-    radial-gradient(ellipse 60% 35% at 15% 0%,rgba(252,76,2,.06) 0%,transparent 70%),
-    radial-gradient(ellipse 50% 40% at 85% 25%,rgba(10,132,255,.05) 0%,transparent 70%),
-    radial-gradient(ellipse 40% 50% at 50% 100%,rgba(48,209,88,.04) 0%,transparent 70%);
+    radial-gradient(ellipse 60% 35% at 15% 0%,var(--glow-o) 0%,transparent 70%),
+    radial-gradient(ellipse 50% 40% at 85% 25%,var(--glow-b) 0%,transparent 70%),
+    radial-gradient(ellipse 40% 50% at 50% 100%,var(--glow-g) 0%,transparent 70%);
 }
 #app{display:flex;flex-direction:column;height:100vh;height:-webkit-fill-available}
 #content{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;
-  padding-bottom:calc(var(--tab) + var(--sb) + 12px);scrollbar-width:none}
+  padding-bottom:calc(var(--tab) + env(safe-area-inset-bottom, 34px) + 12px);scrollbar-width:none}
 #content::-webkit-scrollbar{display:none}
 
 /* ── GLASS ── */
-.g{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);
+.g{background:var(--card);border:1px solid var(--card-border);
   backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
-  box-shadow:0 4px 24px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.06)}
+  box-shadow:0 4px 24px var(--card-shadow),inset 0 1px 0 var(--card-shine)}
 
 /* ══════════════════════════════
    HEADER  — iPhone 13 Pro safe
 ══════════════════════════════ */
 #hdr{
-  /* Use padding-top with safe-area, never a fixed pixel value */
-  padding-top:calc(var(--st) + 8px);
+  /* env() in CSS stylesheet — the only method that works in iOS PWA standalone mode */
+  padding-top:max(env(safe-area-inset-top), 20px);
+  padding-top:max(env(safe-area-inset-top, 47px), 20px);
   padding-left:16px;padding-right:16px;padding-bottom:10px;
-  background:rgba(8,8,8,.92);
+  background:var(--hdr-bg);
   backdrop-filter:saturate(180%) blur(20px);
   -webkit-backdrop-filter:saturate(180%) blur(20px);
-  border-bottom:1px solid rgba(255,255,255,.06);
+  border-bottom:1px solid var(--hdr-border);
   flex-shrink:0;
-  /* sticky but doesn't obscure notch */
   position:sticky;top:0;z-index:50;
 }
 .hdr-r{display:flex;align-items:center;justify-content:space-between;gap:10px}
 .hdr-l{display:flex;align-items:center;gap:10px;min-width:0}
 .hdr-logo{width:32px;height:32px;border-radius:8px;object-fit:cover;flex-shrink:0;
   box-shadow:0 0 0 1.5px rgba(255,255,255,.12),0 2px 8px rgba(0,0,0,.4)}
+/* Theme toggle */
+#themeBtn{
+  width:34px;height:20px;border-radius:10px;border:none;cursor:pointer;
+  background:var(--input-bg);border:1px solid var(--input-border);
+  position:relative;flex-shrink:0;
+  transition:background .3s,border-color .3s;
+  -webkit-tap-highlight-color:transparent;
+}
+#themeBtn::after{
+  content:'';position:absolute;top:2px;left:2px;
+  width:14px;height:14px;border-radius:50%;
+  background:var(--t2);
+  transition:transform .3s cubic-bezier(.34,1.56,.64,1),background .3s;
+}
+:root.light #themeBtn{background:rgba(252,76,2,.15);border-color:rgba(252,76,2,.3)}
+:root.light #themeBtn::after{transform:translateX(14px);background:var(--o)}
+#themeIco{font-size:12px;pointer-events:none;position:absolute;
+  top:50%;left:50%;transform:translate(-50%,-50%);line-height:1}
 .hdr-name{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:900;
   letter-spacing:.06em;color:var(--o);line-height:1;white-space:nowrap}
 .hdr-date{font-size:11px;color:var(--t3);margin-top:1px;line-height:1}
@@ -70,19 +113,19 @@ body{
 .lv-pill{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:800;
   color:#fff;padding:3px 10px;border-radius:20px;white-space:nowrap;transition:background .4s}
 .xp-col{display:flex;flex-direction:column;align-items:flex-end;width:72px}
-.xp-tr{height:3px;background:rgba(255,255,255,.12);border-radius:2px;overflow:hidden}
+.xp-tr{height:3px;background:var(--xp-track);border-radius:2px;overflow:hidden}
 .xp-fi{height:100%;background:linear-gradient(90deg,var(--o),var(--o2));border-radius:2px;transition:width .8s cubic-bezier(.4,0,.2,1)}
 .xp-nm{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--t3);text-align:right;margin-top:2px}
 /* streak */
 .sk-row{display:flex;align-items:center;gap:6px;margin-top:9px;
   padding:7px 11px;
-  background:linear-gradient(90deg,rgba(252,76,2,.09),transparent);
+  background:linear-gradient(90deg,var(--streak-bg),transparent);
   border-left:2px solid var(--o);border-radius:0 8px 8px 0}
 .sk-fl{font-size:17px;line-height:1}
 .sk-n{font-family:'Barlow Condensed',sans-serif;font-size:19px;font-weight:900;color:var(--o);line-height:1}
 .sk-lb{font-size:11px;color:var(--t2);flex:1}
 .sk-ds{display:flex;gap:3px}
-.sk-d{width:19px;height:19px;border-radius:50%;border:1.5px solid rgba(255,255,255,.1);
+.sk-d{width:19px;height:19px;border-radius:50%;border:1.5px solid var(--input-border);
   font-size:8px;display:flex;align-items:center;justify-content:center;color:var(--t3);
   font-family:'JetBrains Mono',monospace}
 .sk-d.on{background:var(--o);border-color:var(--o);color:#fff;font-size:11px}
@@ -93,11 +136,11 @@ body{
 ══════════════════════════════ */
 #tabbar{
   position:fixed;bottom:0;left:0;right:0;
-  height:calc(var(--tab) + var(--sb));
-  padding-bottom:var(--sb);
-  background:rgba(8,8,8,.88);
+  height:calc(var(--tab) + env(safe-area-inset-bottom, 34px));
+  padding-bottom:env(safe-area-inset-bottom, 34px);
+  background:var(--tab-bg);
   backdrop-filter:blur(32px);-webkit-backdrop-filter:blur(32px);
-  border-top:1px solid rgba(255,255,255,.07);
+  border-top:1px solid var(--tab-border);
   display:flex;z-index:100;
 }
 .tab{flex:1;height:var(--tab);display:flex;flex-direction:column;align-items:center;justify-content:center;
@@ -330,7 +373,7 @@ body{
 #toast{
   position:fixed;
   /* Use calc with safe-top for correct placement below notch */
-  top:calc(var(--st) + 10px);
+  top:max(calc(env(safe-area-inset-top, 47px) + 10px), 30px);
   left:50%;
   /* Initial state: just off-screen upward, centered */
   transform:translate(-50%, -60px);
@@ -353,7 +396,7 @@ body{
 ══════════════════════════════ */
 #humor{
   position:fixed;
-  bottom:calc(var(--tab) + var(--sb) + 12px);
+  bottom:calc(var(--tab) + env(safe-area-inset-bottom, 34px) + 12px);
   left:16px;right:16px;
   /* Initial state off-screen downward */
   transform:translateY(20px);
@@ -415,6 +458,7 @@ body{
       <div><div class="hdr-name">TOURS 20KM</div><div class="hdr-date">27 Septembre 2026</div></div>
     </div>
     <div class="xp-w">
+      <button id="themeBtn" aria-label="Basculer le thème" onclick="toggleTheme()"><span id="themeIco">🌙</span></button>
       <div class="lv-pill" id="hdrLv">🏃 LVL 1</div>
       <div class="xp-col">
         <div class="xp-tr"><div class="xp-fi" id="xpBar" style="width:0%"></div></div>
@@ -1337,23 +1381,25 @@ document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>swit
 ══════════════════════════════════════════ */
 if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
 
-// Measure real safe areas via a probe element (most reliable on iOS Safari)
-(function(){
-  const probe=document.createElement('div');
-  probe.style.cssText='position:fixed;top:0;left:0;width:0;height:0;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);pointer-events:none;visibility:hidden';
-  document.body.appendChild(probe);
-  requestAnimationFrame(()=>{
-    const st=parseFloat(getComputedStyle(probe).paddingTop)||0;
-    const sb=parseFloat(getComputedStyle(probe).paddingBottom)||0;
-    document.documentElement.style.setProperty('--st', Math.max(st,20)+'px');
-    document.documentElement.style.setProperty('--sb', Math.max(sb,0)+'px');
-    probe.remove();
-    renderAllures();
-    renderHdr();
-    renderHome();
-    renderPlan(true);
-  });
-})();
+/* ── THEME ── */
+let isDark=true;
+try{isDark=localStorage.getItem('theme')!=='light'}catch(e){}
+function applyTheme(dark){
+  isDark=dark;
+  document.documentElement.classList.toggle('light',!dark);
+  document.getElementById('themeIco').textContent=dark?'🌙':'☀️';
+  try{localStorage.setItem('theme',dark?'dark':'light')}catch(e){}
+  // Update meta theme-color for iOS status bar
+  const meta=document.querySelector('meta[name="theme-color"]');
+  if(meta)meta.content=dark?'#080808':'#f2f2f7';
+}
+function toggleTheme(){applyTheme(!isDark)}
+applyTheme(isDark);
+
+renderAllures();
+renderHdr();
+renderHome();
+renderPlan(true);
 </script>
 </body>
 </html>

@@ -944,20 +944,21 @@ function showBadge(badge){
     bg.animate([{background:'rgba(0,0,0,0)'},{background:'rgba(0,0,0,.6)'}],{duration:300,fill:'forwards'});
     clearTimeout(bpTimer);
     bpTimer=setTimeout(()=>{
-      animateOut(pop,[
+      pop.animate([
         {opacity:1,transform:'translate(-50%,-50%) scale(1)'},
-        {opacity:0,transform:'translate(-50%,-50%) scale(.88)'},
-      ],{duration:280,easing:'ease-in'});
-      bg.animate([{background:'rgba(0,0,0,.55)'},{background:'rgba(0,0,0,0)'}],{duration:280,fill:'forwards'})
+        {opacity:0,transform:'translate(-50%,-50%) scale(.88)'}
+      ],{duration:280,easing:'ease-in',fill:'forwards'})
+        .finished.then(()=>{pop.style.cssText='opacity:0'}).catch(()=>{});
+      bg.animate([{background:'rgba(0,0,0,.6)'},{background:'rgba(0,0,0,0)'}],{duration:280,fill:'forwards'})
         .finished.then(()=>{bg.classList.remove('on');bg.style.background='';}).catch(()=>{});
     },2800);
-  }));
-  // tap anywhere on backdrop to dismiss
-  bg.onclick=()=>{clearTimeout(bpTimer);bpTimer=setTimeout(()=>{
-    animateOut(pop,[{opacity:1},{opacity:0}],{duration:200});
-    bg.animate([{background:'rgba(0,0,0,.55)'},{background:'rgba(0,0,0,0)'}],{duration:200,fill:'forwards'})
+  });
+  bg.onclick=()=>{
+    clearTimeout(bpTimer);
+    pop.animate([{opacity:1},{opacity:0}],{duration:200,fill:'forwards'});
+    bg.animate([{background:'rgba(0,0,0,.6)'},{background:'rgba(0,0,0,0)'}],{duration:200,fill:'forwards'})
       .finished.then(()=>{bg.classList.remove('on');bg.style.background='';bg.onclick=null;}).catch(()=>{});
-  },0)};
+  };
 }
 
 /* ══════════════════════════════════════════

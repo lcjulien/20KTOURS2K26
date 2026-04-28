@@ -17,9 +17,9 @@
   --o:#fc4c02;--o2:#ff6b35;--obg:rgba(252,76,2,.12);
   --bg:#080808;--text:#f0f0f0;--t2:#888;--t3:#3a3a3a;
   --green:#30d158;--blue:#0a84ff;--yellow:#ffd60a;--purple:#bf5af2;
-  /* iPhone safe areas — correct fallbacks for iPhone 13 Pro */
-  --st:env(safe-area-inset-top,47px);
-  --sb:env(safe-area-inset-bottom,34px);
+  /* Safe areas: set by JS on load for accuracy on all iPhones */
+  --st:47px;   /* overridden by JS */
+  --sb:34px;   /* overridden by JS */
   --tab:56px;--r:14px;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
@@ -28,7 +28,6 @@ body{
   min-height:100%;min-height:-webkit-fill-available;
   overflow:hidden;background:var(--bg);color:var(--text);
   font-family:'Barlow',sans-serif;-webkit-font-smoothing:antialiased;
-  /* ambient glow */
   background-image:
     radial-gradient(ellipse 60% 35% at 15% 0%,rgba(252,76,2,.06) 0%,transparent 70%),
     radial-gradient(ellipse 50% 40% at 85% 25%,rgba(10,132,255,.05) 0%,transparent 70%),
@@ -782,15 +781,32 @@ class Spark{
 }
 
 class Ring{
-  constructor(x,y,col){
+  constructor(x,y,col,delay=0){
     this.x=x;this.y=y;this.col=col||'#fc4c02';
-    this.r=0;this.maxR=canvas.width*.4;this.life=1;this.decay=0.025;
+    this.r=0;this.maxR=Math.max(window.innerWidth,window.innerHeight)*.6;
+    this.life=1;this.decay=0.016;this.frames=delay;this.started=false;this.flash=1;
   }
-  update(){this.r+=6+(1-this.life)*4;this.life-=this.decay;}
+  update(){
+    if(this.frames>0){this.frames--;return;}
+    this.started=true;
+    this.r+=9+(1-this.life)*10;
+    this.life-=this.decay;
+    this.flash=Math.max(0,this.flash-0.1);
+  }
   draw(c){
-    c.save();c.globalAlpha=this.life*.5;c.strokeStyle=this.col;
-    c.lineWidth=2*(1-this.r/this.maxR)+.5;
+    if(!this.started||this.r<=0)return;
+    c.save();
+    c.shadowColor=this.col;c.shadowBlur=16;
+    c.globalAlpha=Math.pow(this.life,.5)*.65;
+    c.strokeStyle=this.col;
+    c.lineWidth=Math.max(.3,3*(1-this.r/this.maxR)+.3);
     c.beginPath();c.arc(this.x,this.y,this.r,0,Math.PI*2);c.stroke();
+    if(this.flash>0.05){
+      const g=c.createRadialGradient(this.x,this.y,0,this.x,this.y,this.r*.5);
+      g.addColorStop(0,this.col+'55');g.addColorStop(1,'transparent');
+      c.shadowBlur=0;c.globalAlpha=this.flash*.28;
+      c.fillStyle=g;c.beginPath();c.arc(this.x,this.y,this.r*.5,0,Math.PI*2);c.fill();
+    }
     c.restore();
   }
 }
@@ -807,21 +823,23 @@ function particleLoop(){
 function burst(cx,cy,mega=false){
   canvas.classList.add('on');
   cancelAnimationFrame(raf);
-  // rings
-  const colors=['#fc4c02','#30d158','#0a84ff'];
-  const nR=mega?3:1;
-  for(let i=0;i<nR;i++)setTimeout(()=>{effects.push(new Ring(cx,cy,colors[i%3]))},i*80);
-  // sparks
-  const nSp=mega?24:12;
-  for(let i=0;i<nSp;i++)effects.push(new Spark(cx,cy,PCOLS[Math.floor(Math.random()*PCOLS.length)]));
-  // confetti
-  const nP=mega?120:55;
+  const colors=['#fc4c02','#30d158','#0a84ff','#ffd60a'];
+  // staggered glow rings (frame-delay based, no setTimeout jitter)
+  const nR=mega?4:2;
+  for(let i=0;i<nR;i++) effects.push(new Ring(cx,cy,colors[i%colors.length],i*7));
+  // sparks — more for mega
+  const nSp=mega?32:16;
+  for(let i=0;i<nSp;i++) effects.push(new Spark(cx,cy,PCOLS[Math.floor(Math.random()*PCOLS.length)]));
+  // confetti — burst from click point, mega adds top-rain
+  const nP=mega?140:60;
   for(let i=0;i<nP;i++){
+    const fromTop=mega&&i>60;
     const p=new Particle(
-      mega?Math.random()*canvas.width:cx+(Math.random()-.5)*80,
-      mega?-10:cy,
+      fromTop?Math.random()*canvas.width:cx+(Math.random()-.5)*(mega?160:100),
+      fromTop?-10:cy-(Math.random()*30),
       mega
     );
+    if(fromTop){p.vx=(Math.random()-.5)*4;p.vy=1+Math.random()*3;p.gravity=0.12;}
     particles.push(p);
   }
   raf=requestAnimationFrame(particleLoop);
@@ -858,24 +876,24 @@ function showToast(ico,msg){
   const t=document.getElementById('toast');
   document.getElementById('t-ico').textContent=ico;
   document.getElementById('t-msg').textContent=msg;
-  if(tAnim)tAnim.cancel();
+  if(tAnim){try{tAnim.cancel()}catch(e){}}
   clearTimeout(tTimer);
-  // Force reset
-  t.style.opacity='0';t.style.transform='translate(-50%,-60px)';
-  // Slight delay to allow reset to apply
-  requestAnimationFrame(()=>requestAnimationFrame(()=>{
-    tAnim=animateIn(t,[
+  t.style.cssText='opacity:0;transform:translate(-50%,-60px)';
+  requestAnimationFrame(()=>{
+    tAnim=t.animate([
       {opacity:0,transform:'translate(-50%,-60px)'},
-      {opacity:1,transform:'translate(-50%,0px)',offset:.7},
-      {opacity:1,transform:'translate(-50%,0px)'},
-    ],{duration:420,easing:'cubic-bezier(.34,1.56,.64,1)'});
+      {opacity:1,transform:'translate(-50%,4px)',offset:.65},
+      {opacity:1,transform:'translate(-50%,0px)'}
+    ],{duration:420,easing:'cubic-bezier(.34,1.56,.64,1)',fill:'forwards'});
     tTimer=setTimeout(()=>{
-      animateOut(t,[
+      if(tAnim){try{tAnim.cancel()}catch(e){}}
+      tAnim=t.animate([
         {opacity:1,transform:'translate(-50%,0px)'},
-        {opacity:0,transform:'translate(-50%,-16px)'},
-      ],{duration:280,easing:'ease-in'});
-    },3000);
-  }));
+        {opacity:0,transform:'translate(-50%,-14px)'}
+      ],{duration:280,easing:'ease-in',fill:'forwards'});
+      tAnim.finished.then(()=>{t.style.cssText='opacity:0;transform:translate(-50%,-60px)'}).catch(()=>{});
+    },3200);
+  });
 }
 
 /* ══════════════════════════════════════════
@@ -885,21 +903,24 @@ let hTimer=null,hAnim=null;
 function showHumor(msg){
   const h=document.getElementById('humor');
   h.textContent=msg;
-  if(hAnim)hAnim.cancel();
+  if(hAnim){try{hAnim.cancel()}catch(e){}}
   clearTimeout(hTimer);
-  h.style.opacity='0';h.style.transform='translateY(20px)';
-  requestAnimationFrame(()=>requestAnimationFrame(()=>{
-    hAnim=animateIn(h,[
+  // Direct animate — no animateIn wrapper to avoid Safari opacity bug
+  h.style.cssText='opacity:0;transform:translateY(20px)';
+  requestAnimationFrame(()=>{
+    hAnim=h.animate([
       {opacity:0,transform:'translateY(20px)'},
-      {opacity:1,transform:'translateY(0px)'},
-    ],{duration:380,easing:'cubic-bezier(.34,1.56,.64,1)'});
+      {opacity:1,transform:'translateY(0px)'}
+    ],{duration:380,easing:'cubic-bezier(.34,1.56,.64,1)',fill:'forwards'});
     hTimer=setTimeout(()=>{
-      animateOut(h,[
+      if(hAnim){try{hAnim.cancel()}catch(e){}}
+      hAnim=h.animate([
         {opacity:1,transform:'translateY(0px)'},
-        {opacity:0,transform:'translateY(14px)'},
-      ],{duration:300,easing:'ease-in'});
+        {opacity:0,transform:'translateY(12px)'}
+      ],{duration:300,easing:'ease-in',fill:'forwards'});
+      hAnim.finished.then(()=>{h.style.cssText='opacity:0'}).catch(()=>{});
     },4500);
-  }));
+  });
 }
 
 /* ══════════════════════════════════════════
@@ -913,15 +934,14 @@ function showBadge(badge){
   document.getElementById('bp-name').textContent=badge.nm;
   document.getElementById('bp-desc').textContent=badge.de;
   bg.classList.add('on');
-  pop.style.opacity='0';pop.style.transform='translate(-50%,-50%) scale(.85)';
-  requestAnimationFrame(()=>requestAnimationFrame(()=>{
-    animateIn(pop,[
+  pop.style.cssText='opacity:0;transform:translate(-50%,-50%) scale(.82)';
+  requestAnimationFrame(()=>{
+    pop.animate([
       {opacity:0,transform:'translate(-50%,-50%) scale(.82)'},
       {opacity:1,transform:'translate(-50%,-50%) scale(1.04)',offset:.7},
-      {opacity:1,transform:'translate(-50%,-50%) scale(1)'},
-    ],{duration:460,easing:'cubic-bezier(.34,1.56,.64,1)'});
-    // Backdrop fade
-    bg.animate([{background:'rgba(0,0,0,0)'},{background:'rgba(0,0,0,.55)'}],{duration:300,fill:'forwards'});
+      {opacity:1,transform:'translate(-50%,-50%) scale(1)'}
+    ],{duration:460,easing:'cubic-bezier(.34,1.56,.64,1)',fill:'forwards'});
+    bg.animate([{background:'rgba(0,0,0,0)'},{background:'rgba(0,0,0,.6)'}],{duration:300,fill:'forwards'});
     clearTimeout(bpTimer);
     bpTimer=setTimeout(()=>{
       animateOut(pop,[
@@ -1005,11 +1025,19 @@ function renderHdr(){
   const sk=mxS(done);
   const allK=[];WEEKS.forEach(w=>Object.keys(w.s).forEach(dy=>allK.push(`${w.n}-${dy}`)));
   const l7=allK.slice(-7),dl=['L','M','M','J','V','S','D'];
+  // todayIdx: 0=lundi…6=dimanche, JS getDay() 0=dim → remap
+  const todayDow=(new Date().getDay()+6)%7; // 0=lun…6=dim
+  // find which position in l7 corresponds to today
+  const l7TodayIdx=l7.length-1-(6-todayDow<l7.length-1?6-todayDow:l7.length-1);
+  // Simpler: last item of l7 = today (we always take the last 7 sessions in programme order)
+  // But we want to highlight today's DAY position based on real weekday
+  // Map each l7 slot to a weekday label using actual date arithmetic
+  const nowDay=new Date();
   document.getElementById('skRow').innerHTML=`
     <div class="sk-fl">🔥</div>
     <div class="sk-n">${sk}</div>
     <div class="sk-lb">séances consécutives</div>
-    <div class="sk-ds">${l7.map((k,i)=>`<div class="sk-d ${done[k]?'on':i===l7.length-1?'cur':''}">${done[k]?'✓':dl[i]}</div>`).join('')}</div>`;
+    <div class="sk-ds">${l7.map((k,i)=>{const dayOffset=i-(l7.length-1);const d=new Date(nowDay);d.setDate(d.getDate()+dayOffset);const dow=(d.getDay()+6)%7;const label=dl[dow];const isToday=dayOffset===0;return`<div class="sk-d ${done[k]?'on':isToday?'cur':''}">${done[k]?'✓':label}</div>`}).join('')}</div>`;
 }
 
 /* ══════════════════════════════════════════
@@ -1307,10 +1335,24 @@ document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>swit
    INIT
 ══════════════════════════════════════════ */
 if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
-renderAllures();
-renderHdr();
-renderHome();
-renderPlan(true);
+
+// Measure real safe areas via a probe element (most reliable on iOS Safari)
+(function(){
+  const probe=document.createElement('div');
+  probe.style.cssText='position:fixed;top:0;left:0;width:0;height:0;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);pointer-events:none;visibility:hidden';
+  document.body.appendChild(probe);
+  requestAnimationFrame(()=>{
+    const st=parseFloat(getComputedStyle(probe).paddingTop)||0;
+    const sb=parseFloat(getComputedStyle(probe).paddingBottom)||0;
+    document.documentElement.style.setProperty('--st', Math.max(st,20)+'px');
+    document.documentElement.style.setProperty('--sb', Math.max(sb,0)+'px');
+    probe.remove();
+    renderAllures();
+    renderHdr();
+    renderHome();
+    renderPlan(true);
+  });
+})();
 </script>
 </body>
 </html>

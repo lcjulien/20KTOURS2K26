@@ -445,6 +445,24 @@ body{
 @keyframes su{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
 .su{animation:su .25s ease both}
 .su1{animation-delay:.04s}.su2{animation-delay:.08s}.su3{animation-delay:.12s}
+
+/* ══ #19 — Swipe entre semaines ══ */
+#planBody{transition:opacity .18s ease,transform .18s ease}
+#planBody.swipe-out-left {opacity:0;transform:translateX(-28px);pointer-events:none}
+#planBody.swipe-out-right{opacity:0;transform:translateX(28px); pointer-events:none}
+#planBody.swipe-in       {opacity:1;transform:translateX(0);    pointer-events:auto}
+
+/* ══ #17 — Counter animation ══ */
+@keyframes countUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.count-anim{animation:countUp .45s cubic-bezier(.22,1,.36,1) both}
+
+/* ══ Haptic pulse ring on checkbox ══ */
+@keyframes haptic-ring{
+  0%  {box-shadow:0 0 0 0 var(--hc,rgba(48,209,88,.55))}
+  60% {box-shadow:0 0 0 10px rgba(48,209,88,0)}
+  100%{box-shadow:0 0 0 0   rgba(48,209,88,0)}
+}
+.ck.haptic{animation:haptic-ring .38s ease-out}
 </style>
 </head>
 <body>
@@ -500,7 +518,11 @@ body{
 
   <!-- PLAN -->
   <div class="view" id="view-plan">
-    <div class="wks" id="wkChips"></div>
+    <div style="display:flex;align-items:center;gap:6px;padding:0 12px;padding-top:8px">
+    <button id="wkPrev" onclick="swipePlan('right')" style="width:30px;height:30px;border-radius:50%;border:1px solid var(--card-border);background:var(--card);color:var(--t2);font-size:14px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(8px)">‹</button>
+    <div class="wks" id="wkChips" style="flex:1"></div>
+    <button id="wkNext" onclick="swipePlan('left')" style="width:30px;height:30px;border-radius:50%;border:1px solid var(--card-border);background:var(--card);color:var(--t2);font-size:14px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(8px)">›</button>
+  </div>
     <div class="pb-body" id="planBody"></div>
   </div>
 
@@ -1213,10 +1235,11 @@ function renderPlan(fromChip=false){
         const ww=WEEKS[selW-1];
         const allDone=Object.keys(ww.s).every(dy=>done[`${ww.n}-${dy}`]);
         if(allDone){
-          setTimeout(()=>burst(cx,cy,true),80);
+          setTimeout(()=>{burst(cx,cy,true);triggerHaptic(true);},80);
           setTimeout(()=>showToast('🎉',`Semaine ${ww.n} complète ! 🔥`),180);
         } else {
           burst(cx,cy,false);
+          triggerHaptic(false);
         }
         // humor message
         const hi=hIdx(+btn.dataset.wn,btn.dataset.dy);
@@ -1275,12 +1298,24 @@ function updateSessCard(key){
 ══════════════════════════════════════════ */
 function renderStats(){
   const cnt=Object.values(done).filter(Boolean).length,km=kmD(done),xp=xpTot(done),sk=mxS(done);
-  document.getElementById('stGrid').innerHTML=[
-    {ic:'🏅',lb:'Séances validées',v:`${cnt}/${TOTAL}`,ac:false},
-    {ic:'🗺️',lb:'Km courus',v:`${km} km`,ac:true},
-    {ic:'⚡',lb:'XP Total',v:`${xp}`,ac:true},
-    {ic:'🔥',lb:'Streak max',v:`${sk}`,ac:false},
-  ].map(s=>`<div class="sc g ${s.ac?'ac':''}"><div class="si">${s.ic}</div><div class="sv">${s.v}</div><div class="sl">${s.lb}</div></div>`).join('');
+  const _statRows=[
+    {ic:'🏅',lb:'Séances validées',to:cnt,  suf:'',    extra:`/${TOTAL}`,ac:false},
+    {ic:'🗺️',lb:'Km courus',       to:km,   suf:' km', extra:'',         ac:true},
+    {ic:'⚡',lb:'XP Total',        to:xp,   suf:' XP', extra:'',         ac:true},
+    {ic:'🔥',lb:'Streak max',      to:sk,   suf:'',    extra:'',         ac:false},
+  ];
+  document.getElementById('stGrid').innerHTML=_statRows.map(s=>
+    `<div class="sc g ${s.ac?'ac':''}">
+      <div class="si">${s.ic}</div>
+      <div class="sv count-target" data-to="${s.to}" data-suf="${s.suf}" data-extra="${s.extra}">0${s.suf}${s.extra}</div>
+      <div class="sl">${s.lb}</div>
+    </div>`
+  ).join('');
+  requestAnimationFrame(()=>{
+    document.querySelectorAll('.count-target').forEach(el=>{
+      animCount(el,0,+el.dataset.to,700,el.dataset.suf,el.dataset.extra);
+    });
+  });
   document.getElementById('volBars').innerHTML=WEEKS.map(w=>{
     const p=PHASES[gPh(w)],act=selW===w.n;
     return`<div class="vc" data-w="${w.n}"><div class="vba" style="flex:${w.km/70};background:${act?p.c:p.c+'55'}"></div><span class="vl">S${w.n}</span></div>`;
@@ -1395,6 +1430,103 @@ function applyTheme(dark){
 }
 function toggleTheme(){applyTheme(!isDark)}
 applyTheme(isDark);
+
+
+/* ══ #16 — HAPTIC FEEDBACK ══ */
+function haptic(style='light'){
+  if(!window.navigator||!window.navigator.vibrate)return;
+  // iOS doesn't support vibrate API but we trigger it anyway for Android
+  const patterns={light:20,medium:40,heavy:[60,30,60],success:[30,20,60],mega:[80,40,80,40,120]};
+  navigator.vibrate(patterns[style]||20);
+}
+// iOS Taptic via AudioContext unlock trick — best effort
+let _ac=null;
+function iosTap(intensity=1){
+  try{
+    if(!_ac)_ac=new(window.AudioContext||window.webkitAudioContext)();
+    const o=_ac.createOscillator(),g=_ac.createGain();
+    o.connect(g);g.connect(_ac.destination);
+    o.frequency.value=intensity>0.5?200:150;
+    g.gain.setValueAtTime(0,_ac.currentTime);
+    g.gain.linearRampToValueAtTime(intensity*.08,_ac.currentTime+.003);
+    g.gain.exponentialRampToValueAtTime(0.0001,_ac.currentTime+.04);
+    o.start(_ac.currentTime);o.stop(_ac.currentTime+.04);
+  }catch(e){}
+}
+function triggerHaptic(mega=false){
+  haptic(mega?'mega':'success');
+  iosTap(mega?0.9:0.6);
+}
+
+/* ══ #17 — COMPTEURS ANIMÉS ══ */
+function animCount(el,from,to,duration=600,suffix='',extra=''){
+  if(!el)return;
+  const start=performance.now();
+  const range=to-from;
+  el.classList.add('count-anim');
+  function step(now){
+    const pct=Math.min((now-start)/duration,1);
+    const ease=1-Math.pow(1-pct,3);
+    el.textContent=Math.round(from+range*ease)+suffix+(extra||'');
+    if(pct<1)requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+// Animate all .count-target elements when stats view opens
+function animateStatsNumbers(){
+  document.querySelectorAll('[data-from][data-to]').forEach(el=>{
+    const from=parseFloat(el.dataset.from)||0;
+    const to=parseFloat(el.dataset.to)||0;
+    const suf=el.dataset.suf||'';
+    animCount(el,from,to,700,suf);
+  });
+}
+
+/* ══ #19 — SWIPE ENTRE SEMAINES ══ */
+let _swX=0,_swActive=false,_swLocked=false;
+
+function swipePlan(dir){
+  if(_swLocked)return;
+  const newW=selW+(dir==='left'?1:-1);
+  if(newW<1||newW>WEEKS.length)return;
+  _swLocked=true;
+  const body=document.getElementById('planBody');
+  const chips=document.getElementById('wkChips');
+  // animate out
+  body.classList.add(dir==='left'?'swipe-out-left':'swipe-out-right');
+  setTimeout(()=>{
+    body.classList.remove('swipe-out-left','swipe-out-right');
+    selW=newW;
+    renderPlan(true);
+    // animate in
+    body.style.opacity='0';body.style.transform=`translateX(${dir==='left'?'28px':'-28px'})`;
+    requestAnimationFrame(()=>{
+      body.classList.add('swipe-in');
+      body.style.opacity='';body.style.transform='';
+      setTimeout(()=>{body.classList.remove('swipe-in');_swLocked=false;},200);
+    });
+  },180);
+}
+
+function initPlanSwipe(){
+  const el=document.getElementById('view-plan');
+  el.addEventListener('touchstart',e=>{_swX=e.touches[0].clientX;_swActive=true;},{passive:true});
+  el.addEventListener('touchmove',e=>{
+    if(!_swActive)return;
+    // Prevent swipe if horizontal scroll is happening on chips row
+    const dy=Math.abs(e.touches[0].clientY-e.touches[0].clientY);
+    // just track
+  },{passive:true});
+  el.addEventListener('touchend',e=>{
+    if(!_swActive){return;}
+    _swActive=false;
+    const dx=e.changedTouches[0].clientX-_swX;
+    if(Math.abs(dx)<55)return; // threshold
+    swipePlan(dx<0?'left':'right');
+  },{passive:true});
+}
+
+initPlanSwipe();
 
 renderAllures();
 renderHdr();

@@ -989,7 +989,7 @@ const currWk=d=>{const w=WEEKS[selW-1];return Object.keys(w.s).filter(dy=>d[`${w
 const xpTot=d=>WEEKS.reduce((a,w)=>a+Object.entries(w.s).reduce((b,[dy,s])=>d[`${w.n}-${dy}`]?b+(AL[s.t]?.x||50):b,0),0);
 const getLv=xp=>{for(let i=LEVELS.length-1;i>=0;i--)if(xp>=LEVELS[i].min)return{idx:i,...LEVELS[i]};return{idx:0,...LEVELS[0]}};
 const mxS=d=>{let s=0,mx=0;WEEKS.forEach(w=>Object.keys(w.s).forEach(dy=>{if(d[`${w.n}-${dy}`]){s++;mx=Math.max(mx,s)}else s=0}));return mx};
-const cdDays=()=>Math.max(0,Math.ceil((new Date('2026-09-27')-new Date())/864e5));
+const cdDays=()=>Math.max(0,Math.ceil((new Date(2026,8,27)-new Date())/864e5));
 const ulk=d=>{const n=Object.values(d).filter(Boolean).length;return BADGES.filter(b=>b.ok(n,d))};
 function hIdx(wn,dy){let i=0;for(const w of WEEKS){for(const d of Object.keys(w.s)){if(w.n===wn&&d===dy)return i;i++;}}return 0;}
 
@@ -1397,7 +1397,7 @@ function renderWkGlance(){
   const dayLabel={mar:'Mar',mer:'Mer',jeu:'Jeu',sam:'Sam',dim:'Dim'};
 
   // Compute real calendar dates for each session day
-  const PROG_START_GL=new Date('2026-07-06');
+  const PROG_START_GL=new Date(2026,6,6); // local date — avoids UTC-TZ offset
   const DAY_OFF_GL={mar:1,mer:2,jeu:3,sam:5,dim:6};
 
   const doneCount=Object.keys(w.s).filter(dy=>done[`${w.n}-${dy}`]).length;
@@ -1423,12 +1423,12 @@ function renderWkGlance(){
     }
     const a=AL[s.t];
     return `<div class="wkg-day${isDone?' done':''}${isToday?' today':''}"
-      data-k="${w.n}-${dy}" style="border-color:${isDone?'rgba(48,209,88,.3)':a.c+'33'}">
+      data-k="${w.n}-${dy}" style="border-color:${isDone?'rgba(124,184,122,.35)':a.c+'33'}">
       <div class="wkg-day-lbl" style="${isToday?'':''}">
         ${dayLabel[dy]}
       </div>
       <div class="wkg-day-ico">${SESS_EMO[s.t]||'🏃'}</div>
-      <div class="wkg-day-type" style="color:${isDone?'var(--green)':a.c}">
+      <div class="wkg-day-type" style="color:${isDone?'var(--a1)':a.c}">
         ${SESS_SHORT[s.t]||s.t}
       </div>
       <div class="wkg-ck">✓</div>
@@ -1438,7 +1438,7 @@ function renderWkGlance(){
   const el=document.getElementById('wkGlance');
   if(!el)return;
   el.style.background=p.bg;
-  el.style.borderColor=p.bo;
+  el.style.borderColor=p.bo||p.c+'44';
   el.innerHTML=`
     <div class="wkg-header">
       <div class="wkg-title" style="color:${p.c}">Semaine ${w.n}</div>
@@ -1924,7 +1924,7 @@ initPlanSwipe();
 
 
 /* ════ CALENDRIER ENGINE ════ */
-const PROG_START=new Date('2026-07-06'); // Mon S1
+const PROG_START=new Date(2026,6,6); // Mon S1 — local date, avoids UTC offset bug
 const MNAMES=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
 const DAY_OFF={mar:1,mer:2,jeu:3,sam:5,dim:6};
 
@@ -2078,7 +2078,7 @@ function setPlanTab(tab){
 // 1. Auto-detect current programme week FIRST (before any render)
 (function(){
   const now=new Date();
-  const prog=new Date('2026-07-06');
+  const prog=new Date(2026,6,6);
   const diffDays=Math.floor((now-prog)/864e5);
   if(diffDays>=0&&diffDays<84){
     selW=Math.min(12,Math.floor(diffDays/7)+1);
@@ -2092,12 +2092,9 @@ initCalNav();
 // 3. Render static views (allures built once)
 renderAllures();
 
-// 4. Render header, then home, then plan (pre-built hidden)
+// 4. Render synchronously — no rAF, no timing issues
 renderHdr();
 renderHome();
-
-// 5. Pre-build plan in background (no scroll, no side effects on home)
-requestAnimationFrame(()=>renderPlan(false));
 </script>
 </body>
 </html>

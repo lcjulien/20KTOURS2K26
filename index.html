@@ -274,7 +274,7 @@ body::after{
   text-transform:uppercase;letter-spacing:.14em;margin-bottom:2px}
 .tt{font-size:12px;color:var(--t2);line-height:1.45}
 /* Progress card */
-.gpc{margin:0 16px;border-radius:var(--r-lg);padding:16px}
+.gpc{margin:0 16px;border-radius:var(--r-lg);padding:16px;min-height:80px}
 .gp-h{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px}
 .gp-tit{font-family:'Barlow Condensed',sans-serif;font-size:19px;font-weight:800}
 .gp-p{font-family:'Barlow Condensed',sans-serif;font-size:30px;font-weight:900;color:var(--a1)}
@@ -527,6 +527,8 @@ body::after{
 #badge-bg.on{display:block}
 
 @keyframes su{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.su,.su-ready{animation:su .32s cubic-bezier(.16,1,.3,1) both}
+.su1{animation-delay:.04s}.su2{animation-delay:.09s}.su3{animation-delay:.14s}
 .su{animation:su .25s ease both}
 .su1{animation-delay:.04s}.su2{animation-delay:.08s}.su3{animation-delay:.12s}
 
@@ -627,7 +629,7 @@ body::after{
 .ptb svg{opacity:.8}
 
 /* ════ WEEK AT A GLANCE ════ */
-.wk-glance{margin:0 16px;border-radius:var(--r);padding:16px;}
+.wk-glance{margin:0 16px;border-radius:var(--r);padding:16px;min-height:120px;}
 .wkg-header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px}
 .wkg-title{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:800;color:var(--text)}
 .wkg-phase{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;padding:3px 10px;border-radius:20px;border:1px solid}
@@ -690,7 +692,7 @@ body::after{
 
   <!-- HOME -->
   <div class="view active" id="view-home">
-    <div class="hero su">
+    <div class="hero">
       <div class="hero-sup">🏁 Objectif course</div>
       <div class="hero-bd">
         <div><div class="hero-t">20km<br>de Tours</div><div class="hero-d">Dim. 27 sept. 2026 · Quai Paul Bert</div></div>
@@ -704,14 +706,14 @@ body::after{
       </div>
     </div>
 
-    <div class="shd su su1">SEMAINE EN COURS</div>
-    <div class="wk-glance g su su1" id="wkGlance"></div>
-    <div class="shd su su2">PROCHAINE SÉANCE</div>
-    <div id="nextCard" class="su su2"></div>
-    <div class="shd su su2">CONSEIL DU JOUR</div>
-    <div class="tc su su2" id="tipCard"></div>
-    <div class="shd su su3">PROGRESSION</div>
-    <div class="gpc g su su3" id="gProgCard"></div>
+    <div class="shd">SEMAINE EN COURS</div>
+    <div class="wk-glance g" id="wkGlance"></div>
+    <div class="shd">PROCHAINE SÉANCE</div>
+    <div id="nextCard"></div>
+    <div class="shd">CONSEIL DU JOUR</div>
+    <div id="tipCard"></div>
+    <div class="shd">PROGRESSION</div>
+    <div class="gpc g" id="gProgCard"></div>
     <div style="height:14px"></div>
   </div>
 
@@ -857,12 +859,12 @@ const WEEKS=[
 ];
 const TOTAL=WEEKS.reduce((a,w)=>a+Object.keys(w.s).length,0);
 const LEVELS=[
-  {min:0,   ti:'Randonneur', ic:'🥾',co:'#8fa68c'},
-  {min:200, ti:'Sentier',    ic:'🌲',co:'#7cb87a'},
-  {min:500, ti:'Sommet',     ic:'⛰️', co:'#a8c5a0'},
-  {min:1000,ti:'Alpiniste',  ic:'🧗',co:'#6b9ab8'},
-  {min:2000,ti:'Traileur',   ic:'🦅',co:'#c8956c'},
-  {min:3000,ti:'Chamois',    ic:'🏔️', co:'#d4e8b0'},
+  {min:0,   ti:'Débutant',  ic:'🏃',co:'#8fa68c'},
+  {min:200, ti:'Régulier',   ic:'⚡',co:'#7cb87a'},
+  {min:500, ti:'Endurant',   ic:'🔥',co:'#a8c5a0'},
+  {min:1000,ti:'Performeur', ic:'💪',co:'#6b9ab8'},
+  {min:2000,ti:'Compétiteur',ic:'🎯',co:'#c8956c'},
+  {min:3000,ti:'Élite',      ic:'🏆',co:'#d4e8b0'},
 ];
 const BADGES=[
   {id:'b1', ic:'👟',nm:'Premier Pas',    de:'1ère séance validée',        ok:n=>n>=1},
@@ -871,7 +873,7 @@ const BADGES=[
   {id:'b4', ic:'⚡',nm:'Quart de route', de:'25 séances validées',        ok:n=>n>=25},
   {id:'b5', ic:'🎯',nm:'Mi-Chemin',       de:'30 séances validées',        ok:n=>n>=30},
   {id:'b6', ic:'💨',nm:'Frac Master',    de:'10 fracs court validés',     ok:(n,d)=>cT(d,'FractionCourt')>=10},
-  {id:'b7', ic:'🗺️',nm:'Grand Marcheur', de:'5 sorties longues validées', ok:(n,d)=>cT(d,'SortieLongue')>=5},
+  {id:'b7', ic:'🗺️',nm:'Grand Coureur',  de:'5 sorties longues validées', ok:(n,d)=>cT(d,'SortieLongue')>=5},
   {id:'b8', ic:'⚔️',nm:'Guerrier Seuil', de:'5 séances seuil validées',   ok:(n,d)=>cT(d,'Seuil')>=5},
   {id:'b9', ic:'🎽',nm:'Expert Allure',  de:'8 séances AS21 validées',    ok:(n,d)=>cT(d,'AS21')>=8},
   {id:'b10',ic:'🌱',nm:'Phase Dév.',      de:'Développement terminé',      ok:(n,d)=>phFull('développement',d)},
@@ -1374,7 +1376,7 @@ function renderHdr(){
 
 const SESS_EMO={
   EF:'🏃',FractionCourt:'⚡',FractionLong:'🔥',
-  Seuil:'💪',Cote:'⛰️',AS21:'🎯',
+  Seuil:'💪',Cote:'💪',AS21:'🎯',
   SortieLongue:'🗺️',Deblocage:'🌬️',Course:'🏁'
 };
 // Short label for each type (fits in small cell)
@@ -1487,12 +1489,15 @@ function renderWkGlance(){
 
 function renderHome(){
   document.getElementById('cdN').textContent=cdDays();
-  renderWkGlance();
+  const wkgEl=document.getElementById('wkGlance');
+  if(wkgEl) renderWkGlance();
   // next undone session
   let ns=null,nw=null,nd=null;
   out:for(const ww of WEEKS)for(const[dy,s]of Object.entries(ww.s)){if(!done[`${ww.n}-${dy}`]){ns=s;nw=ww;nd=dy;break out;}}
   const a=ns?AL[ns.t]:null;
-  document.getElementById('nextCard').innerHTML=ns
+  const ncEl=document.getElementById('nextCard');
+  ncEl.style.cssText='margin:0 16px';
+  ncEl.innerHTML=ns
     ?`<div class="nc g live" style="padding-left:18px">
         <div class="nc-ac" style="background:${a.c}"></div>
         <div class="nc-ey">S${nw.n} · ${DAY[nd]}</div>
@@ -1503,10 +1508,12 @@ function renderHome(){
           <span class="np">${ns.k} km</span><span class="np">+${a.x} XP</span>
         </div>
       </div>`
-    :`<div class="nc g" style="margin:0 16px"><div class="nc-ty" style="color:var(--green)">🎉 Programme complet !</div></div>`;
+    :`<div class="nc g"><div class="nc-ty" style="color:var(--a1)">🎉 Programme complet !</div></div>`;
   // tip
   const tip=TIPS[Math.floor(Date.now()/86400000)%TIPS.length];
-  document.getElementById('tipCard').innerHTML=`<div class="ti">${tip.ic}</div><div><div class="tl">${tip.l}</div><div class="tt">${tip.t}</div></div>`;
+  const tipEl=document.getElementById('tipCard');
+  tipEl.className='tc g';
+  tipEl.innerHTML=`<div class="ti">${tip.ic}</div><div><div class="tl">${tip.l}</div><div class="tt">${tip.t}</div></div>`;
   // global progress
   const cnt=Object.values(done).filter(Boolean).length;
   const km=kmD(done),xp=xpTot(done),gp=Math.round((cnt/TOTAL)*100);
@@ -1514,7 +1521,7 @@ function renderHome(){
     <div class="gp-h"><div class="gp-tit">12 semaines · 60 séances</div><div class="gp-p">${gp}%</div></div>
     <div class="gp-s">
       <div class="gps"><div class="gps-v">${cnt}</div><div class="gps-l">séances</div></div>
-      <div class="gps"><div class="gps-v" style="color:var(--green)">${km}</div><div class="gps-l">km courus</div></div>
+      <div class="gps"><div class="gps-v" style="color:var(--a1)">${km}</div><div class="gps-l">km courus</div></div>
       <div class="gps"><div class="gps-v" style="color:var(--a1)">${xp}</div><div class="gps-l">XP</div></div>
     </div>
     <div class="pb"><div class="pf" style="width:${gp}%;background:linear-gradient(90deg,var(--a1),var(--a3))"></div></div>`;
@@ -2068,10 +2075,7 @@ function setPlanTab(tab){
   else renderPlan(false);
   document.getElementById('content').scrollTop=0;
 }
-calAutoMonth();
-initCalNav();
-renderAllures();
-// Auto-set selW to current programme week based on real date
+// 1. Auto-detect current programme week FIRST (before any render)
 (function(){
   const now=new Date();
   const prog=new Date('2026-07-06');
@@ -2080,9 +2084,20 @@ renderAllures();
     selW=Math.min(12,Math.floor(diffDays/7)+1);
   }
 })();
+
+// 2. Init calendar
+calAutoMonth();
+initCalNav();
+
+// 3. Render static views (allures built once)
+renderAllures();
+
+// 4. Render header, then home, then plan (pre-built hidden)
 renderHdr();
 renderHome();
-renderPlan(true);
+
+// 5. Pre-build plan in background (no scroll, no side effects on home)
+requestAnimationFrame(()=>renderPlan(false));
 </script>
 </body>
 </html>

@@ -1004,12 +1004,25 @@ const save=()=>{try{localStorage.setItem('t20_v4',JSON.stringify(done))}catch(e)
    PARTICLE ENGINE — canvas-based, physics
 ══════════════════════════════════════════ */
 let particles=[], raf=null;
-const canvas=document.getElementById('pcanvas');
-const ctx=canvas.getContext('2d');
 const PCOLS=['#7cb87a','#c8956c','#a8c5a0','#d4e8b0','#6b9ab8','#9b8fb8','#d4c47a','#e8ead4'];
 
-function initCanvas(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;}
-window.addEventListener('resize',initCanvas);initCanvas();
+// Lazy canvas init — only when first burst() is called (avoids crash at parse time)
+let canvas=null,ctx=null,canvasReady=false;
+function ensureCanvas(){
+  if(canvasReady)return true;
+  try{
+    canvas=document.getElementById('pcanvas');
+    if(!canvas)return false;
+    ctx=canvas.getContext('2d');
+    canvas.width=window.innerWidth;
+    canvas.height=window.innerHeight;
+    window.addEventListener('resize',()=>{
+      if(canvas){canvas.width=window.innerWidth;canvas.height=window.innerHeight;}
+    });
+    canvasReady=true;
+    return true;
+  }catch(e){return false;}
+}
 
 class Particle{
   constructor(x,y,mega){
@@ -1087,7 +1100,7 @@ class Spark{
 class Ring{
   constructor(x,y,col,delay=0){
     this.x=x;this.y=y;this.col=col||'#7cb87a';
-    this.r=0;this.maxR=Math.max(window.innerWidth,window.innerHeight)*.6;
+    this.r=0;this.maxR=Math.max(window.innerWidth||390,window.innerHeight||844)*.6;
     this.life=1;this.decay=0.016;this.frames=delay;this.started=false;this.flash=1;
   }
   update(){
@@ -1117,14 +1130,16 @@ class Ring{
 
 let effects=[];
 function particleLoop(){
+  if(!canvasReady)return;
   ctx.clearRect(0,0,canvas.width,canvas.height);
   effects=effects.filter(e=>{e.update();e.draw(ctx);return e.life>0});
   particles=particles.filter(p=>{p.update();p.draw(ctx);return p.life>0});
   if(effects.length>0||particles.length>0){raf=requestAnimationFrame(particleLoop);}
-  else{canvas.classList.remove('on');}
+  else if(canvas){canvas.classList.remove('on');}
 }
 
 function burst(cx,cy,mega=false){
+  if(!ensureCanvas())return;
   canvas.classList.add('on');
   cancelAnimationFrame(raf);
   const colors=['#7cb87a','#c8956c','#6b9ab8','#d4e8b0'];

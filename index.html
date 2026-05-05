@@ -1473,44 +1473,56 @@ function renderWkGlance(){
       </div>
     </div>`;
 
-  // Make days tappable to validate directly from home
-  el.querySelectorAll('.wkg-day[data-k]').forEach(cell=>{
-    cell.addEventListener('click',()=>{
-      const k=cell.dataset.k;
-      if(!k)return;
-      const was=!!done[k];
-      done[k]=!done[k];
-      if(!done[k])delete done[k];
-      save();
-      if(!was){
-        triggerHaptic(false);
-        const r=cell.getBoundingClientRect();
-        burst(r.left+r.width/2,r.top+r.height/2,false);
-        const [wn,dy]=k.split('-');
-        const hIdx=getHumorIdx(+wn,dy);
-        setTimeout(()=>showHumor(HUMOR[hIdx]||HUMOR[0]),300);
-        // Check week complete
-        const ww=WEEKS[selW-1];
-        const allDone=Object.keys(ww.s).every(d=>done[`${ww.n}-${d}`]);
-        if(allDone){setTimeout(()=>{burst(window.innerWidth/2,300,true);showToast('🎉',`Semaine ${ww.n} bouclée ! 🔥`)},200);}
-      }
-      checkBadges();
-      renderHdr();
-      renderWkGlance();
-      renderHome(); // refresh next card etc.
-    });
+}
+
+// Event delegation on wkGlance — survives innerHTML rebuilds
+let _wkGlanceDelegated=false;
+function initWkGlanceDelegate(){
+  if(_wkGlanceDelegated)return;
+  const container=document.getElementById('wkGlance');
+  if(!container)return;
+  _wkGlanceDelegated=true;
+  container.addEventListener('click',function(e){
+    const cell=e.target.closest('.wkg-day[data-k]');
+    if(!cell)return;
+    const k=cell.dataset.k;
+    if(!k)return;
+    const was=!!done[k];
+    done[k]=!done[k];
+    if(!done[k])delete done[k];
+    save();
+    if(!was){
+      triggerHaptic(false);
+      const r=cell.getBoundingClientRect();
+      burst(r.left+r.width/2,r.top+r.height/2,false);
+      const[wn,dy]=k.split('-');
+      const hIdx=getHumorIdx(+wn,dy);
+      setTimeout(()=>showHumor(HUMOR[hIdx]||HUMOR[0]),300);
+      const ww=WEEKS[selW-1];
+      const allDone=Object.keys(ww.s).every(d=>done[`${ww.n}-${d}`]);
+      if(allDone){setTimeout(()=>{burst(window.innerWidth/2,300,true);showToast('🎉',`Semaine ${ww.n} bouclée ! 🔥`)},200);}
+    }
+    checkBadges();
+    refreshHome();
   });
 }
 
-function renderHome(){
-  document.getElementById('cdN').textContent=cdDays();
-  const wkgEl=document.getElementById('wkGlance');
-  if(wkgEl) renderWkGlance();
-  // next undone session
+// refreshHome: updates all home cards (called from click handlers & tab switch)
+function refreshHome(){
+  initWkGlanceDelegate(); // attach once, after DOM exists
+  renderHdr();
+  renderWkGlance();
+  renderNextCard();
+  renderTipCard();
+  renderProgCard();
+}
+
+function renderNextCard(){
   let ns=null,nw=null,nd=null;
   out:for(const ww of WEEKS)for(const[dy,s]of Object.entries(ww.s)){if(!done[`${ww.n}-${dy}`]){ns=s;nw=ww;nd=dy;break out;}}
   const a=ns?AL[ns.t]:null;
   const ncEl=document.getElementById('nextCard');
+  if(!ncEl)return;
   ncEl.style.cssText='margin:0 16px';
   ncEl.innerHTML=ns
     ?`<div class="nc g live" style="padding-left:18px">
@@ -1524,15 +1536,22 @@ function renderHome(){
         </div>
       </div>`
     :`<div class="nc g"><div class="nc-ty" style="color:var(--a1)">🎉 Programme complet !</div></div>`;
-  // tip
+}
+
+function renderTipCard(){
   const tip=TIPS[Math.floor(Date.now()/86400000)%TIPS.length];
   const tipEl=document.getElementById('tipCard');
+  if(!tipEl)return;
   tipEl.className='tc g';
   tipEl.innerHTML=`<div class="ti">${tip.ic}</div><div><div class="tl">${tip.l}</div><div class="tt">${tip.t}</div></div>`;
-  // global progress
+}
+
+function renderProgCard(){
   const cnt=Object.values(done).filter(Boolean).length;
   const km=kmD(done),xp=xpTot(done),gp=Math.round((cnt/TOTAL)*100);
-  document.getElementById('gProgCard').innerHTML=`
+  const el=document.getElementById('gProgCard');
+  if(!el)return;
+  el.innerHTML=`
     <div class="gp-h"><div class="gp-tit">12 semaines · 60 séances</div><div class="gp-p">${gp}%</div></div>
     <div class="gp-s">
       <div class="gps"><div class="gps-v">${cnt}</div><div class="gps-l">séances</div></div>
@@ -1540,6 +1559,14 @@ function renderHome(){
       <div class="gps"><div class="gps-v" style="color:var(--a1)">${xp}</div><div class="gps-l">XP</div></div>
     </div>
     <div class="pb"><div class="pf" style="width:${gp}%;background:linear-gradient(90deg,var(--a1),var(--a3))"></div></div>`;
+}
+
+function renderHome(){
+  document.getElementById('cdN').textContent=cdDays();
+  renderWkGlance();
+  renderNextCard();
+  renderTipCard();
+  renderProgCard();
 }
 
 /* ══════════════════════════════════════════
@@ -1650,8 +1677,8 @@ function renderPlan(fromChip=false){
       renderChips(false);
       updateWkHeader();
       updateSessCard(k);
-      if(activeV==='home'){renderWkGlance();renderHome();}
-      else renderWkGlance(); // always keep glance in sync
+      if(activeV==='home') refreshHome();
+      else renderWkGlance();
       if(planTab==='cal')renderCal();
     });
   });
@@ -1815,7 +1842,7 @@ function switchV(name){
   if(name==='stats')renderStats();
   else if(name==='badges')renderBadges();
   else if(name==='plan'){renderPlan(true);}
-  else if(name==='home')renderHome();
+  else if(name==='home')refreshHome();
   else if(name==='allures')renderAllures();
 }
 document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>switchV(b.dataset.v)));
@@ -2107,9 +2134,8 @@ initCalNav();
 // 3. Render static views (allures built once)
 renderAllures();
 
-// 4. Render synchronously — no rAF, no timing issues
-renderHdr();
-renderHome();
+// 4. Render synchronously — full home init
+refreshHome();
 </script>
 </body>
 </html>

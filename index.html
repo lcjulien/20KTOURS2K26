@@ -1042,9 +1042,16 @@ function hIdx(wn,dy){let i=0;for(const w of WEEKS){for(const d of Object.keys(w.
    STATE
 ══════════════════════════════════════════ */
 let done={};try{done=JSON.parse(localStorage.getItem('t20_v4')||'{}')}catch(e){}
-let selW=1,activeV='home',prevBadges=new Set(ulk(done).map(b=>b.id));
 let currentW=1; // Semaine calendaire réelle — indépendante de selW
+
+// selW : semaine sélectionnée dans le Plan, persistée
+let selW=1;
+try{const s=+localStorage.getItem('t20_selW');if(s>=1&&s<=12)selW=s;}catch(e){}
+
+let activeV='home',prevBadges=new Set(ulk(done).map(b=>b.id));
+let _planDirty=false; // true quand done{} a changé hors Plan → force re-render à la prochaine visite
 const save=()=>{try{localStorage.setItem('t20_v4',JSON.stringify(done))}catch(e){}};
+const saveSelW=()=>{try{localStorage.setItem('t20_selW',String(selW))}catch(e){}};
 
 /* ══════════════════════════════════════════
    PARTICLE ENGINE — canvas-based, physics
@@ -1500,12 +1507,19 @@ function initWkGlanceDelegate(){
       const[wn,dy]=k.split('-');
       const humorIndex=hIdx(+wn,dy);
       setTimeout(()=>showHumor(HUMOR[humorIndex]||HUMOR[0]),300);
-      const ww=WEEKS[currentW-1]; // semaine calendaire pour le check "semaine bouclée"
+      const ww=WEEKS[currentW-1];
       const allDone=Object.keys(ww.s).every(d=>done[`${ww.n}-${d}`]);
       if(allDone){setTimeout(()=>{burst(window.innerWidth/2,300,true);showToast('🎉',`Semaine ${ww.n} bouclée ! 🔥`)},200);}
     }
     checkBadges();
-    refreshHome();
+    // Mise à jour Home (toujours)
+    renderHdr();
+    renderWkGlance();
+    renderNextCard();
+    renderProgCard();
+    // Si le Plan est affiché en parallèle (ne devrait pas arriver mais sécurité)
+    // → on marque le plan comme "dirty" pour forcer re-render à la prochaine visite
+    _planDirty=true;
   });
 }
 
@@ -1579,7 +1593,7 @@ function renderChips(doScroll=false){
     return`<button class="wk${isActive?' active':''}" data-w="${w.n}" data-s="${st}"><span class="wk-dot"></span>S${w.n}</button>`;
   }).join('');
   el.querySelectorAll('.wk').forEach(b=>{
-    b.addEventListener('click',()=>{selW=+b.dataset.w;renderPlan(true);});
+    b.addEventListener('click',()=>{selW=+b.dataset.w;saveSelW();renderPlan(true);});
   });
   if(doScroll){const a=el.querySelector('.wk.active');if(a)a.scrollIntoView({behavior:'smooth',inline:'center',block:'nearest'});}
 }
@@ -1686,6 +1700,7 @@ function renderPlan(fromChip=false){
         btn.classList.remove('on');
       }
       checkBadges();
+      _planDirty=false; // plan vient d'être mis à jour
       // Targeted updates — no scroll reset
       renderHdr();
       renderChips(false);
@@ -1769,7 +1784,7 @@ function renderStats(){
       <span class="vl" style="color:${act?p.c:'var(--t3)'};font-weight:${act?700:400}">S${w.n}</span>
     </div>`;
   }).join('');
-  document.getElementById('volBars').querySelectorAll('.vc').forEach(el=>el.addEventListener('click',()=>{selW=+el.dataset.w;switchV('plan');}));
+  document.getElementById('volBars').querySelectorAll('.vc').forEach(el=>el.addEventListener('click',()=>{selW=+el.dataset.w;saveSelW();switchV('plan');}));
   document.getElementById('phRows').innerHTML=Object.entries(PHASES).map(([k,p])=>{
     const pw=WEEKS.filter(w=>p.w.includes(w.n));
     const tot=pw.reduce((a,w)=>a+Object.keys(w.s).length,0);
@@ -1855,7 +1870,11 @@ function switchV(name){
   document.querySelector(`[data-v="${name}"]`).classList.add('active');
   if(name==='stats')renderStats();
   else if(name==='badges')renderBadges();
-  else if(name==='plan'){renderPlan(true);}
+  else if(name==='plan'){
+    // Si done{} a changé depuis le dernier render du Plan → re-render complet
+    if(_planDirty){renderPlan(true);_planDirty=false;}
+    else renderPlan(true);
+  }
   else if(name==='home')refreshHome();
   else if(name==='allures')renderAllures();
   // Scroll reset AFTER render to avoid Safari layout glitch
@@ -1946,6 +1965,7 @@ function swipePlan(dir){
   setTimeout(()=>{
     body.classList.remove('swipe-out-left','swipe-out-right');
     selW=newW;
+    saveSelW();
     renderPlan(true);
     // animate in
     body.style.opacity='0';body.style.transform=`translateX(${dir==='left'?'28px':'-28px'})`;
@@ -2141,11 +2161,31 @@ function setPlanTab(tab){
   } else if(diffDays>=84){
     detected=12;
   }
-  currentW=detected; // semaine réelle calendaire — ne change jamais via nav
-  selW=detected;     // semaine sélectionnée dans le Plan — change via navigation
+  currentW=detected; // toujours recalculé — jamais persisté
+  // selW : respecte la préférence sauvegardée si elle existe
+  const saved=+localStorage.getItem('t20_selW');
+  if(!saved||saved<1||saved>12) selW=detected;
+  // sinon selW est déjà restauré depuis localStorage ci-dessus
 })();
 
-// 2. Init calendar
+/* ══════════════════════════════════════════
+   MIDNIGHT REFRESH — compte à rebours & conseil du jour
+══════════════════════════════════════════ */
+function scheduleMidnightRefresh(){
+  const now=new Date();
+  const tomorrow=new Date(now.getFullYear(),now.getMonth(),now.getDate()+1,0,0,10); // 00:00:10
+  const msUntilMidnight=tomorrow-now;
+  setTimeout(()=>{
+    // Mise à jour silencieuse des éléments dépendants du jour
+    document.getElementById('cdN').textContent=cdDays();
+    if(activeV==='home'){
+      renderTipCard(); // nouveau conseil du jour
+      renderHdr();     // streak recalculé
+    }
+    scheduleMidnightRefresh(); // replanifier pour le lendemain
+  },msUntilMidnight);
+}
+scheduleMidnightRefresh();
 calAutoMonth();
 initCalNav();
 

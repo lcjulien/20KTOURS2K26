@@ -422,7 +422,50 @@ body::after{
 .ch-ba{height:4px;background:rgba(255,255,255,.08);border-radius:3px;overflow:hidden}
 .ch-fi{height:100%;border-radius:3px;transition:width .6s}
 
-/* ── ALLURES ── */
+/* ── Badge AUJOURD'HUI sur carte séance ── */
+.se-today-badge{
+  display:inline-flex;align-items:center;gap:4px;
+  font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;
+  color:var(--bg);background:var(--a1);
+  padding:2px 7px;border-radius:8px;letter-spacing:.06em;
+  text-transform:uppercase;
+  box-shadow:0 0 10px rgba(124,184,122,.45);
+  animation:today-pulse 2.2s ease-in-out infinite;
+}
+@keyframes today-pulse{
+  0%,100%{box-shadow:0 0 8px rgba(124,184,122,.4)}
+  50%{box-shadow:0 0 16px rgba(124,184,122,.75),0 0 28px rgba(124,184,122,.2)}
+}
+.se.is-today{
+  border-color:rgba(124,184,122,.45)!important;
+  box-shadow:0 0 0 1px rgba(124,184,122,.25),0 4px 20px rgba(124,184,122,.1),0 3px 16px rgba(0,0,0,.25)!important;
+}
+
+/* ── Streak pills — jours calendaires réels ── */
+.sk-d.today-dot{
+  border-color:var(--a1);color:var(--a1);font-weight:700;
+  background:rgba(124,184,122,.12);
+}
+/* ══════════════════════════════
+   VIEW TRANSITIONS — staggered entrance
+══════════════════════════════ */
+@keyframes view-card-in{
+  from{opacity:0;transform:translateY(14px)}
+  to  {opacity:1;transform:translateY(0)}
+}
+.view-enter>*{
+  opacity:0;
+  animation:view-card-in .38s cubic-bezier(.16,1,.3,1) both;
+}
+.view-enter>*:nth-child(1){animation-delay:.03s}
+.view-enter>*:nth-child(2){animation-delay:.07s}
+.view-enter>*:nth-child(3){animation-delay:.11s}
+.view-enter>*:nth-child(4){animation-delay:.15s}
+.view-enter>*:nth-child(5){animation-delay:.19s}
+.view-enter>*:nth-child(6){animation-delay:.22s}
+.view-enter>*:nth-child(7){animation-delay:.25s}
+.view-enter>*:nth-child(8){animation-delay:.28s}
+
 .al-pad{padding:0 16px 8px}
 .alc{border-radius:var(--r);padding:13px;margin-bottom:7px;display:flex;gap:11px}
 .al-s{width:3px;flex-shrink:0;border-radius:2px;align-self:stretch;min-height:48px}
@@ -1000,6 +1043,7 @@ function hIdx(wn,dy){let i=0;for(const w of WEEKS){for(const d of Object.keys(w.
 ══════════════════════════════════════════ */
 let done={};try{done=JSON.parse(localStorage.getItem('t20_v4')||'{}')}catch(e){}
 let selW=1,activeV='home',prevBadges=new Set(ulk(done).map(b=>b.id));
+let currentW=1; // Semaine calendaire réelle — indépendante de selW
 const save=()=>{try{localStorage.setItem('t20_v4',JSON.stringify(done))}catch(e){}};
 
 /* ══════════════════════════════════════════
@@ -1304,14 +1348,43 @@ function renderHdr(){
   document.getElementById('xpBar').style.width=`${pct}%`;
   document.getElementById('xpNm').textContent=`${xp}/${nxt.min} XP`;
   const sk=mxS(done);
-  const allK=[];WEEKS.forEach(w=>Object.keys(w.s).forEach(dy=>allK.push(`${w.n}-${dy}`)));
-  const l7=allK.slice(-7),dl=['L','M','M','J','V','S','D'];
-  const nowDay=new Date();
+
+  // ── Streak pills : 7 vrais jours calendaires (lun→dim de la semaine en cours) ──
+  const PROG_START_SK=new Date(2026,6,6);
+  const DAY_OFF_SK={mar:1,mer:2,jeu:3,sam:5,dim:6};
+  const dl=['L','M','M','J','V','S','D'];
+  const now=new Date();now.setHours(0,0,0,0);
+  // Lundi de la semaine courante
+  const dow=(now.getDay()+6)%7;
+  const monday=new Date(now);monday.setDate(now.getDate()-dow);
+
+  const pills=Array.from({length:7},(_,i)=>{
+    const day=new Date(monday);day.setDate(monday.getDate()+i);
+    const isToday=day.getTime()===now.getTime();
+    const dayLabel=dl[i];
+    // Cherche si une séance du programme correspond à ce jour calendaire
+    let hasSess=false,isDoneSess=false;
+    WEEKS.forEach(w=>{
+      Object.entries(w.s).forEach(([dy])=>{
+        const sd=new Date(PROG_START_SK);
+        sd.setDate(sd.getDate()+(w.n-1)*7+DAY_OFF_SK[dy]);
+        if(sd.getTime()===day.getTime()){
+          hasSess=true;
+          if(done[`${w.n}-${dy}`])isDoneSess=true;
+        }
+      });
+    });
+    let cls='sk-d';
+    if(isDoneSess)cls+=' on';
+    else if(isToday)cls+=' today-dot';
+    return`<div class="${cls}">${isDoneSess?'✓':dayLabel}</div>`;
+  }).join('');
+
   document.getElementById('skRow').innerHTML=`
     <div class="sk-fl">🔥</div>
     <div class="sk-n">${sk}</div>
     <div class="sk-lb">séances consécutives</div>
-    <div class="sk-ds">${l7.map((k,i)=>{const dayOffset=i-(l7.length-1);const d=new Date(nowDay);d.setDate(d.getDate()+dayOffset);const dow=(d.getDay()+6)%7;const label=dl[dow];const isToday=dayOffset===0;return`<div class="sk-d ${done[k]?'on':isToday?'cur':''}">${done[k]?'✓':label}</div>`}).join('')}</div>`;
+    <div class="sk-ds">${pills}</div>`;
 }
 
 /* ══════════════════════════════════════════
@@ -1331,7 +1404,7 @@ const SESS_SHORT={
 };
 
 function renderWkGlance(){
-  const w=WEEKS[selW-1];
+  const w=WEEKS[currentW-1]; // ← semaine calendaire réelle, pas selW
   const ph=gPh(w);
   const p=PHASES[ph];
   const today=new Date();
@@ -1427,7 +1500,7 @@ function initWkGlanceDelegate(){
       const[wn,dy]=k.split('-');
       const humorIndex=hIdx(+wn,dy);
       setTimeout(()=>showHumor(HUMOR[humorIndex]||HUMOR[0]),300);
-      const ww=WEEKS[selW-1];
+      const ww=WEEKS[currentW-1]; // semaine calendaire pour le check "semaine bouclée"
       const allDone=Object.keys(ww.s).every(d=>done[`${ww.n}-${d}`]);
       if(allDone){setTimeout(()=>{burst(window.innerWidth/2,300,true);showToast('🎉',`Semaine ${ww.n} bouclée ! 🔥`)},200);}
     }
@@ -1532,6 +1605,15 @@ function renderPlan(fromChip=false){
       font-family="Barlow Condensed,sans-serif" font-weight="800" font-size="12" fill="${p.c}">${wpct}%</text>
   </svg>`;
   const quote=QUOTES[(w.n-1)%QUOTES.length];
+  // Détection du jour courant pour badge AUJOURD'HUI
+  const todayDate=new Date();todayDate.setHours(0,0,0,0);
+  const PROG_START_RP=new Date(2026,6,6);
+  const DAY_OFF_RP={mar:1,mer:2,jeu:3,sam:5,dim:6};
+  const isTodaySess=(wn,dy)=>{
+    const sd=new Date(PROG_START_RP);
+    sd.setDate(sd.getDate()+(wn-1)*7+(DAY_OFF_RP[dy]||0));
+    return sd.getTime()===todayDate.getTime();
+  };
   document.getElementById('planBody').innerHTML=`
     <div class="wh" style="background:${p.bg};border-color:${p.bo}">
       <div class="wh-t">
@@ -1549,9 +1631,13 @@ function renderPlan(fromChip=false){
     ${isWkDone?`<div class="qc"><div class="qc-t">"${quote.t}"</div><div class="qc-a">— ${quote.a}</div></div>`:''}
     ${Object.entries(w.s).map(([dy,s])=>{
       const a=AL[s.t],k=`${w.n}-${dy}`,dn=!!done[k],isr=s.t==='Course';
-      return`<div class="se ${isr?'race':''} ${dn?'done':''}" style="--tc:${a.c}">
+      const isToday=isTodaySess(w.n,dy);
+      return`<div class="se ${isr?'race':''} ${dn?'done':''} ${isToday?'is-today':''}" style="--tc:${a.c}">
         <div class="se-h">
-          <span class="se-dy">${DAY[dy]}</span>
+          <div style="display:flex;align-items:center;gap:7px">
+            <span class="se-dy">${DAY[dy]}</span>
+            ${isToday&&!dn?'<span class="se-today-badge">📍 Aujourd\'hui</span>':''}
+          </div>
           <div class="se-ri">
             <span class="se-xp">+${a.x} XP</span>
             <span class="se-km">${s.k} km</span>
@@ -1763,7 +1849,8 @@ function checkBadges(){
 function switchV(name){
   activeV=name;
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
-  document.getElementById(`view-${name}`).classList.add('active');
+  const nextView=document.getElementById(`view-${name}`);
+  nextView.classList.add('active');
   document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
   document.querySelector(`[data-v="${name}"]`).classList.add('active');
   if(name==='stats')renderStats();
@@ -1772,7 +1859,14 @@ function switchV(name){
   else if(name==='home')refreshHome();
   else if(name==='allures')renderAllures();
   // Scroll reset AFTER render to avoid Safari layout glitch
-  requestAnimationFrame(()=>document.getElementById('content').scrollTop=0);
+  requestAnimationFrame(()=>{
+    document.getElementById('content').scrollTop=0;
+    // Staggered entrance animation — trigger after render
+    nextView.classList.remove('view-enter');
+    void nextView.offsetWidth; // force reflow
+    nextView.classList.add('view-enter');
+    setTimeout(()=>nextView.classList.remove('view-enter'),600);
+  });
 }
 document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>switchV(b.dataset.v)));
 
@@ -2041,12 +2135,14 @@ function setPlanTab(tab){
   const now=new Date();
   const prog=new Date(2026,6,6); // 6 juillet 2026
   const diffDays=Math.floor((now-prog)/864e5);
+  let detected=1;
   if(diffDays>=0&&diffDays<84){
-    selW=Math.min(12,Math.floor(diffDays/7)+1);
+    detected=Math.min(12,Math.floor(diffDays/7)+1);
   } else if(diffDays>=84){
-    selW=12; // programme terminé → dernière semaine
+    detected=12;
   }
-  // diffDays < 0 : programme pas encore commencé → selW reste 1
+  currentW=detected; // semaine réelle calendaire — ne change jamais via nav
+  selW=detected;     // semaine sélectionnée dans le Plan — change via navigation
 })();
 
 // 2. Init calendar
@@ -2058,6 +2154,12 @@ renderAllures();
 
 // 4. Render synchronously — full home init
 refreshHome();
+// Animation d'entrée initiale sur la vue Home
+requestAnimationFrame(()=>{
+  const homeView=document.getElementById('view-home');
+  homeView.classList.add('view-enter');
+  setTimeout(()=>homeView.classList.remove('view-enter'),700);
+});
 </script>
 </body>
 </html>

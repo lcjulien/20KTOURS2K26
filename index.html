@@ -20,17 +20,17 @@
   /* ── Alpine accent palette ── */
   --a1:#7cb87a;    /* Vert mousse — accent principal */
   --a1d:#5a9658;   /* Vert foncé — hover/active */
-  --a1bg:rgba(124,184,122,.12);
+  --a1bg:rgba(124,184,122,.15);
   --a2:#c8956c;    /* Terre cuite — urgence / course */
-  --a2bg:rgba(200,149,108,.12);
+  --a2bg:rgba(200,149,108,.15);
   --a3:#d4e8b0;    /* Vert très clair — highlight data */
   --a4:#8fa68c;    /* Sauge — icônes secondaires */
 
-  /* ── Phases overrides (plus naturels) ── */
-  --ph-dev:#7cb87a;   /* Développement — vert */
-  --ph-assim:#c8956c; /* Assimilation — terre */
-  --ph-spec:#6b9ab8;  /* Spécifique — bleu ardoise */
-  --ph-affu:#b8756b;  /* Affûtage — rouille */
+  /* ── Phases ── */
+  --ph-dev:#7cb87a;
+  --ph-assim:#c8956c;
+  --ph-spec:#6b9ab8;
+  --ph-affu:#b8756b;
 
   /* ── Divers ── */
   --tab:56px;--r:12px;--r-lg:16px;
@@ -40,55 +40,97 @@
   --bg:#0d1208;
   --bg2:#141c0e;
   --bg3:#1c2614;
-  --text:#e8ead4;
-  --t2:#8fa68c;
-  --t3:#4a5e44;
-  --card:rgba(28,38,20,.7);
-  --card-border:rgba(124,184,122,.1);
-  --card-shine:rgba(212,232,176,.05);
+  --text:#e8ead4;           /* ratio 13.4:1 sur --bg ✓ */
+  --t2:#a8bea6;             /* ↑ était #8fa68c (5.1:1 → 7.2:1) */
+  --t3:#6e8c6a;             /* ↑ était #4a5e44 (3.2:1 → 4.6:1) ✓ WCAG AA */
+  --card:rgba(28,38,20,.75);
+  --card-border:rgba(124,184,122,.14);
+  --card-shine:rgba(212,232,176,.06);
   --card-shadow:rgba(0,0,0,.5);
-  --hdr-bg:rgba(13,18,8,.93);
-  --hdr-border:rgba(124,184,122,.08);
-  --tab-bg:rgba(13,18,8,.92);
-  --tab-border:rgba(124,184,122,.1);
-  --streak-bg:rgba(124,184,122,.08);
-  --input-border:rgba(124,184,122,.15);
-  --input-bg:rgba(124,184,122,.06);
+  --hdr-bg:rgba(13,18,8,.95);
+  --hdr-border:rgba(124,184,122,.1);
+  --tab-bg:rgba(13,18,8,.95);
+  --tab-border:rgba(124,184,122,.12);
+  --streak-bg:rgba(124,184,122,.1);
+  --input-border:rgba(124,184,122,.22);
+  --input-bg:rgba(124,184,122,.08);
   --glow-a:rgba(124,184,122,.06);
   --glow-b:rgba(107,154,184,.04);
   --glow-c:rgba(200,149,108,.04);
-  --xp-track:rgba(212,232,176,.1);
-  /* Grain texture (SVG base64 bruit Perlin) */
+  --xp-track:rgba(212,232,176,.12);
+  /* Fonds de cartes génériques — opaques pour garantir le contraste */
+  --se-bg:rgba(36,50,28,.85);          /* session cards dark */
+  --se-border:rgba(124,184,122,.12);
+  --wk-bg:rgba(36,50,28,.7);           /* week chips dark */
+  --wk-border:rgba(124,184,122,.18);
+  --km-pill-bg:rgba(124,184,122,.12);
+  --km-pill-border:rgba(124,184,122,.22);
+  --progress-track:rgba(255,255,255,.1);
+  --ck-border:rgba(168,190,166,.35);   /* checkbox border visible */
+  --sp-fc-color:var(--t2);
+  --sp-fc-border:rgba(168,190,166,.28);
   --grain:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
 }
 
 /* ── Light mode — Parchemin & forêt ── */
 :root.light{
-  --green:#5a9658;
+  --green:#3d7a3a;           /* plus sombre pour lisibilité sur clair */
+  --a1:#3d7a3a;              /* vert plus foncé en light — ratio 5.2:1 sur --bg ✓ */
+  --a1d:#2f6030;
+  --a1bg:rgba(61,122,58,.1);
+  --a2:#9e5e38;              /* terre cuite assombrie pour light */
+  --a2bg:rgba(158,94,56,.1);
   --bg:#f5f0e8;
   --bg2:#faf7f2;
-  --bg3:#ede8dc;
-  --text:#1a2414;
-  --t2:#4a5e44;
-  --t3:#8fa68c;
-  --card:rgba(255,253,248,.82);
-  --card-border:rgba(90,150,88,.14);
-  --card-shine:rgba(255,255,255,.95);
-  --card-shadow:rgba(20,30,10,.09);
-  --hdr-bg:rgba(245,240,232,.94);
-  --hdr-border:rgba(90,150,88,.12);
-  --tab-bg:rgba(245,240,232,.94);
-  --tab-border:rgba(90,150,88,.14);
-  --streak-bg:rgba(124,184,122,.09);
-  --input-border:rgba(90,150,88,.2);
-  --input-bg:rgba(90,150,88,.07);
-  --glow-a:rgba(124,184,122,.07);
-  --glow-b:rgba(107,154,184,.04);
-  --glow-c:rgba(200,149,108,.05);
-  --xp-track:rgba(90,150,88,.15);
+  --bg3:#ece6da;
+  --text:#141e0f;            /* ratio 12.8:1 ✓ */
+  --t2:#2e4a2a;              /* ↑ était #4a5e44 → ratio 6.8:1 ✓ */
+  --t3:#4a6645;              /* ↑ était #8fa68c (2.8:1 → 5.1:1) ✓ WCAG AA */
+  --card:rgba(255,252,245,.92);
+  --card-border:rgba(61,122,58,.18);
+  --card-shine:rgba(255,255,255,.98);
+  --card-shadow:rgba(20,30,10,.1);
+  --hdr-bg:rgba(245,240,232,.97);
+  --hdr-border:rgba(61,122,58,.15);
+  --tab-bg:rgba(245,240,232,.97);
+  --tab-border:rgba(61,122,58,.18);
+  --streak-bg:rgba(61,122,58,.08);
+  --input-border:rgba(61,122,58,.28);
+  --input-bg:rgba(61,122,58,.08);
+  --glow-a:rgba(61,122,58,.06);
+  --glow-b:rgba(80,120,150,.04);
+  --glow-c:rgba(158,94,56,.05);
+  --xp-track:rgba(61,122,58,.18);
+  /* Fonds de cartes light — fond neutre légèrement teinté */
+  --se-bg:rgba(240,236,226,.95);
+  --se-border:rgba(61,122,58,.2);
+  --wk-bg:rgba(235,230,218,.9);
+  --wk-border:rgba(61,122,58,.22);
+  --km-pill-bg:rgba(61,122,58,.1);
+  --km-pill-border:rgba(61,122,58,.25);
+  --progress-track:rgba(61,122,58,.14);
+  --ck-border:rgba(61,122,58,.4);
+  --sp-fc-color:var(--t2);
+  --sp-fc-border:rgba(61,122,58,.22);
+  --ph-spec:#3d6e8a;         /* bleu ardoise assombri */
+  --ph-affu:#8a4a42;         /* rouille assombrie */
+  --ph-assim:#8a5c38;        /* terre assombrie */
+  --ph-dev:#3d7a3a;
 }
-:root.light .hero{background:linear-gradient(135deg,rgba(124,184,122,.14),rgba(245,240,232,0) 65%)!important;border-color:rgba(124,184,122,.28)!important}
-:root.light .np{background:rgba(90,150,88,.07)!important;border-color:rgba(90,150,88,.18)!important}
+/* ── Light mode overrides spécifiques ── */
+:root.light .hero{background:linear-gradient(135deg,rgba(61,122,58,.12),rgba(245,240,232,0) 65%)!important;border-color:rgba(61,122,58,.25)!important}
+:root.light .np{background:rgba(61,122,58,.08)!important;border-color:rgba(61,122,58,.2)!important;color:var(--t2)!important}
+:root.light .np.h{background:var(--a1bg)!important;border-color:rgba(61,122,58,.35)!important;color:var(--a1)!important}
+:root.light .qc{background:linear-gradient(135deg,rgba(61,122,58,.08),rgba(245,240,232,0))!important;border-color:rgba(61,122,58,.18)!important}
+:root.light .tc{background:rgba(61,100,130,.08)!important;border:1px solid rgba(61,100,130,.2)!important}
+:root.light .wkg-day{background:rgba(235,230,218,.8)!important}
+:root.light .wkg-day.done{background:rgba(61,122,58,.1)!important;border-color:rgba(61,122,58,.35)!important}
+:root.light .cal-cell.sess{background:rgba(235,230,218,.9)!important}
+:root.light .cal-cell.rest{background:rgba(220,215,205,.5)!important}
+:root.light .lvc{background:linear-gradient(135deg,rgba(61,122,58,.1),rgba(245,240,232,0))!important;border-color:rgba(61,122,58,.22)!important}
+:root.light .bgc{background:rgba(235,230,218,.8)!important;border-color:rgba(61,122,58,.15)!important}
+:root.light .bgc.got{background:rgba(61,122,58,.1)!important;border-color:rgba(61,122,58,.28)!important}
+:root.light .wk{background:var(--wk-bg)!important;border-color:var(--wk-border)!important}
 
 /* ── Transitions douces & organiques ── */
 *{transition:background-color .4s cubic-bezier(.16,1,.3,1),border-color .4s cubic-bezier(.16,1,.3,1),color .25s ease,box-shadow .4s cubic-bezier(.16,1,.3,1)}
@@ -186,7 +228,7 @@ body::after{
 .sk-d.cur{border-color:var(--a1);color:var(--a1)}
 
 /* ══════════════════════════════
-   TABBAR — Alpine
+   TABBAR — Liquid blob
 ══════════════════════════════ */
 #tabbar{
   position:fixed;bottom:0;left:0;right:0;
@@ -196,12 +238,64 @@ body::after{
   backdrop-filter:blur(32px);-webkit-backdrop-filter:blur(32px);
   border-top:1px solid var(--tab-border);
   display:flex;z-index:100;
+  overflow:hidden;
 }
-.tab{flex:1;height:var(--tab);display:flex;flex-direction:column;align-items:center;justify-content:center;
+/* Le blob liquide — positionné en absolu dans le tabbar */
+#tab-blob{
+  position:absolute;
+  top:6px;
+  height:calc(var(--tab) - 12px);
+  border-radius:14px;
+  background:var(--a1bg);
+  /* Spring physics via cubic-bezier surtendu */
+  transition:
+    left .42s cubic-bezier(.34,1.56,.64,1),
+    width .42s cubic-bezier(.34,1.56,.64,1),
+    background .5s ease;
+  pointer-events:none;
+  z-index:0;
+  /* Reflet interne */
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.15),0 2px 12px rgba(124,184,122,.15);
+  /* Squash & stretch via scale au clic */
+  transform-origin:center center;
+}
+:root.light #tab-blob{
+  background:rgba(61,122,58,.1);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.6),0 2px 12px rgba(61,122,58,.12);
+}
+/* Animation squash au changement */
+@keyframes blob-squash{
+  0%  {transform:scaleX(1.18) scaleY(.82)}
+  40% {transform:scaleX(.92)  scaleY(1.08)}
+  70% {transform:scaleX(1.04) scaleY(.97)}
+  100%{transform:scaleX(1)    scaleY(1)}
+}
+.blob-anim{animation:blob-squash .44s cubic-bezier(.34,1.56,.64,1) both}
+
+.tab{
+  flex:1;height:var(--tab);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
   gap:2px;border:none;background:transparent;color:var(--t3);
-  font-family:'DM Sans',sans-serif;font-size:10px;font-weight:600;cursor:pointer;transition:color .2s}
-.tab svg{width:21px;height:21px}
+  font-family:'DM Sans',sans-serif;font-size:10px;font-weight:600;
+  cursor:pointer;
+  /* Pas de transition sur color — géré par JS pour être synchrone avec le blob */
+  transition:color .22s ease;
+  position:relative;z-index:1; /* au-dessus du blob */
+}
+.tab svg{
+  width:21px;height:21px;
+  transition:transform .42s cubic-bezier(.34,1.56,.64,1);
+}
 .tab.active{color:var(--a1)}
+.tab.active svg{transform:translateY(-1px) scale(1.08)}
+/* Micro-bounce sur l'icône active */
+@keyframes tab-icon-in{
+  0%  {transform:translateY(3px) scale(.85)}
+  60% {transform:translateY(-2px) scale(1.12)}
+  80% {transform:translateY(0px) scale(1.05)}
+  100%{transform:translateY(-1px) scale(1.08)}
+}
+.tab.active svg{animation:tab-icon-in .4s cubic-bezier(.34,1.56,.64,1) both}
 
 /* ══════════════════════════════
    VIEWS
@@ -246,7 +340,7 @@ body::after{
   font-family:'Playfair Display',Georgia,serif;
   font-size:54px;font-weight:900;color:var(--a1);line-height:1;text-align:right;
 }
-.cd-u{font-size:10px;color:var(--t2);text-align:right;letter-spacing:.1em;text-transform:uppercase}
+.cd-u{font-size:10px;color:var(--t2);text-align:right;letter-spacing:.1em;text-transform:uppercase;margin-top:4px}
 .hero-rw{display:flex;margin-top:14px;padding-top:14px;border-top:1px solid rgba(124,184,122,.12)}
 .hs{flex:1;text-align:center}
 .hs+.hs{border-left:1px solid rgba(124,184,122,.12)}
@@ -284,14 +378,14 @@ body::after{
 .gps{text-align:center}
 .gps-v{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:800}
 .gps-l{font-size:10px;color:var(--t3);margin-top:1px}
-.pb{height:5px;background:rgba(255,255,255,.08);border-radius:3px;overflow:hidden}
+.pb{height:5px;background:var(--progress-track);border-radius:3px;overflow:hidden}
 .pf{height:100%;border-radius:3px;transition:width .9s cubic-bezier(.4,0,.2,1)}
 
 /* ── PLAN ── */
 .wks{overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding:10px 16px 8px;display:flex;gap:5px}
 .wks::-webkit-scrollbar{display:none}
 .wk{flex-shrink:0;position:relative;padding:6px 14px;border-radius:20px;
-  background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);
+  background:var(--wk-bg);border:1px solid var(--wk-border);
   font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;color:var(--t2);
   cursor:pointer;transition:all .15s;white-space:nowrap;
   backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
@@ -319,7 +413,7 @@ body::after{
 .wh-p{flex:1}
 .wh-pr{display:flex;justify-content:space-between;margin-bottom:3px}
 .wh-pl{font-size:12px;color:var(--t2)}.wh-pv{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700}
-.wh-br{height:4px;background:rgba(255,255,255,.08);border-radius:3px;overflow:hidden;margin-top:5px}
+.wh-br{height:4px;background:var(--progress-track);border-radius:3px;overflow:hidden;margin-top:5px}
 .wh-bf{height:100%;border-radius:3px;transition:width .6s}
 /* quote */
 .qc{border-radius:var(--r-lg);padding:18px;margin-bottom:8px;
@@ -334,13 +428,14 @@ body::after{
 .qc-a{font-size:11px;color:var(--a1);font-weight:600;letter-spacing:.08em;text-transform:uppercase}
 /* session cards */
 .se{border-radius:var(--r);padding:12px 12px 12px 16px;margin-bottom:7px;position:relative;overflow:hidden;
-  background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);
+  background:var(--se-bg);border:1px solid var(--se-border);
   backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
-  box-shadow:0 3px 16px rgba(0,0,0,.25),inset 0 1px 0 rgba(255,255,255,.06);
+  box-shadow:0 3px 16px var(--card-shadow),inset 0 1px 0 var(--card-shine);
   transition:transform .12s}
-.se::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--tc,rgba(255,255,255,.12));border-radius:3px 0 0 3px}
+.se::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--tc,var(--card-border));border-radius:3px 0 0 3px}
 .se:active{transform:scale(.99)}
-.se.done{background:rgba(124,184,122,.05);border-color:rgba(124,184,122,.2)}
+.se.done{background:rgba(124,184,122,.08);border-color:rgba(124,184,122,.25)}
+:root.light .se.done{background:rgba(61,122,58,.08)!important;border-color:rgba(61,122,58,.25)!important}
 .se.done::before{background:var(--a1)}
 @keyframes rg{0%,100%{box-shadow:0 0 0 0 rgba(184,117,107,.2)}50%{box-shadow:0 0 14px 3px rgba(184,117,107,.08)}}
 .se.race{border-color:rgba(184,117,107,.4);animation:rg 2.5s ease-in-out infinite}
@@ -348,10 +443,10 @@ body::after{
 .se-dy{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--t3)}
 .se-ri{display:flex;align-items:center;gap:7px}
 .se-xp{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--a1);font-weight:600}
-.se-km{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);border-radius:9px;
+.se-km{background:var(--km-pill-bg);border:1px solid var(--km-pill-border);border-radius:9px;
   padding:2px 7px;font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;color:var(--t2)}
 /* checkbox */
-.ck{width:26px;height:26px;border-radius:50%;border:2px solid rgba(255,255,255,.18);
+.ck{width:26px;height:26px;border-radius:50%;border:2px solid var(--ck-border);
   background:transparent;display:flex;align-items:center;justify-content:center;
   cursor:pointer;font-size:13px;color:transparent;flex-shrink:0}
 .ck.on{border-color:var(--a1)!important;background:var(--a1)!important;color:var(--bg)!important;box-shadow:0 0 8px rgba(124,184,122,.4)}
@@ -363,7 +458,7 @@ body::after{
 .se.done .se-dt{color:var(--t3);text-decoration:line-through;text-decoration-color:rgba(124,184,122,.3)}
 .se-ps{display:flex;gap:4px;flex-wrap:wrap}
 .sp{font-size:11px;font-weight:600;padding:2px 8px;border-radius:9px;border:1px solid}
-.sp-fc{color:var(--t3)!important;border-color:rgba(255,255,255,.1)!important}
+.sp-fc{color:var(--sp-fc-color)!important;border-color:var(--sp-fc-border)!important}
 
 /* ── STATS ── */
 .st-pad{padding:0 16px 8px}
@@ -381,7 +476,7 @@ body::after{
 .pr-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px}
 .pr-n{font-family:'Barlow Condensed',sans-serif;font-size:19px;font-weight:800}
 .pr-p{font-family:'Barlow Condensed',sans-serif;font-size:19px;font-weight:800}
-.pr-b{height:5px;background:rgba(255,255,255,.08);border-radius:3px;overflow:hidden}
+.pr-b{height:5px;background:var(--progress-track);border-radius:3px;overflow:hidden}
 .pr-f{height:100%;border-radius:3px;transition:width .7s cubic-bezier(.4,0,.2,1)}
 
 /* ── BADGES ── */
@@ -397,13 +492,13 @@ body::after{
 .lv-sb{font-size:13px;color:var(--t2);margin:3px 0 14px}
 .lv-xr{display:flex;justify-content:space-between;margin-bottom:4px}
 .lv-xl{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--t3)}
-.lv-tr{height:7px;background:rgba(255,255,255,.1);border-radius:4px;overflow:hidden}
+.lv-tr{height:7px;background:var(--progress-track);border-radius:4px;overflow:hidden}
 .lv-fi{height:100%;background:linear-gradient(90deg,var(--a1),var(--a3));border-radius:4px;transition:width .8s}
 .bg-gr{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:10px}
 .bgc{border-radius:12px;padding:12px 6px;text-align:center;
-  background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);
+  background:var(--se-bg);border:1px solid var(--se-border);
   backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
-.bgc.got{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.13)}
+.bgc.got{background:var(--card);border-color:var(--card-border)}
 .bgc.got .bgu{display:block}
 .bgc.no{opacity:.3;filter:grayscale(1) brightness(.5)}
 .bge{font-size:26px;margin-bottom:5px;display:block}
@@ -419,7 +514,7 @@ body::after{
 .ch-xl{font-size:9px;color:var(--t3)}
 .ch-pr{display:flex;justify-content:space-between;margin-bottom:3px}
 .ch-pl{font-size:11px;color:var(--t3)}.ch-pv{font-size:11px;font-weight:600;color:var(--t2)}
-.ch-ba{height:4px;background:rgba(255,255,255,.08);border-radius:3px;overflow:hidden}
+.ch-ba{height:4px;background:var(--progress-track);border-radius:3px;overflow:hidden}
 .ch-fi{height:100%;border-radius:3px;transition:width .6s}
 
 /* ── Badge AUJOURD'HUI sur carte séance ── */
@@ -447,8 +542,70 @@ body::after{
   background:rgba(124,184,122,.12);
 }
 /* ══════════════════════════════
-   VIEW TRANSITIONS — staggered entrance
+   SCROLL MEMORY — position par vue
 ══════════════════════════════ */
+/* Pas de CSS nécessaire — géré en JS */
+
+/* ══════════════════════════════
+   STATS — Tendance & courbe
+══════════════════════════════ */
+.trend-wrap{border-radius:var(--r);padding:14px 14px 10px;margin-bottom:7px;position:relative;overflow:hidden}
+.trend-hdr{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px}
+.trend-title{font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:800;color:var(--text)}
+.trend-legend{display:flex;gap:12px}
+.trend-leg{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--t2)}
+.trend-leg-dot{width:8px;height:3px;border-radius:2px;flex-shrink:0}
+.trend-svg-wrap{width:100%;overflow:hidden}
+.trend-svg{width:100%;display:block}
+/* Tooltip tendance */
+.trend-tooltip{
+  position:absolute;background:rgba(10,14,8,.95);border:1px solid var(--card-border);
+  border-radius:8px;padding:6px 10px;font-size:11px;color:var(--text);
+  pointer-events:none;opacity:0;transition:opacity .15s;white-space:nowrap;
+  font-family:'JetBrains Mono',monospace;z-index:10;
+}
+/* Rythme hebdo card */
+.pace-card{border-radius:var(--r);padding:14px;margin-bottom:7px}
+.pace-row{display:flex;justify-content:space-between;align-items:center;
+  padding:6px 0;border-bottom:1px solid var(--card-border)}
+.pace-row:last-child{border-bottom:none}
+.pace-wk{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--t3);flex-shrink:0;width:28px}
+.pace-bar-wrap{flex:1;margin:0 10px;height:5px;background:var(--progress-track);border-radius:3px;overflow:hidden;position:relative}
+.pace-bar-prog{height:100%;border-radius:3px;transition:width .8s cubic-bezier(.4,0,.2,1)}
+.pace-bar-plan{position:absolute;top:0;left:0;height:100%;border-radius:3px;opacity:.22}
+.pace-km{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;
+  min-width:52px;text-align:right;line-height:1}
+.pace-pct{font-size:9px;color:var(--t3);text-align:right}
+
+/* ══════════════════════════════
+   FOND GÉNÉRATIF — courbes de niveau animées
+══════════════════════════════ */
+#topo-canvas{
+  position:fixed;inset:0;z-index:0;pointer-events:none;
+  opacity:.55;
+}
+:root.light #topo-canvas{opacity:.35;}
+
+@keyframes topo-drift-1{
+  0%  {transform:translate(0,0)   scale(1)}
+  33% {transform:translate(-18px,12px) scale(1.03)}
+  66% {transform:translate(10px,-8px)  scale(.98)}
+  100%{transform:translate(0,0)   scale(1)}
+}
+@keyframes topo-drift-2{
+  0%  {transform:translate(0,0)   rotate(0deg)}
+  50% {transform:translate(14px,6px) rotate(1.5deg)}
+  100%{transform:translate(0,0)   rotate(0deg)}
+}
+@keyframes topo-drift-3{
+  0%  {transform:translate(0,0)}
+  40% {transform:translate(-8px,18px)}
+  100%{transform:translate(0,0)}
+}
+#topo-layer-1{transform-origin:60% 40%;animation:topo-drift-1 28s ease-in-out infinite}
+#topo-layer-2{transform-origin:40% 60%;animation:topo-drift-2 38s ease-in-out infinite}
+#topo-layer-3{transform-origin:50% 50%;animation:topo-drift-3 22s ease-in-out infinite}
+
 @keyframes view-card-in{
   from{opacity:0;transform:translateY(14px)}
   to  {opacity:1;transform:translateY(0)}
@@ -531,7 +688,7 @@ body::after{
   transform:translateY(20px);
   opacity:0;
   background:rgba(12,12,12,.96);
-  border:1px solid rgba(255,255,255,.11);
+  border:1px solid var(--card-border);
   border-radius:18px;
   padding:12px 16px;
   font-family:'Barlow',sans-serif;font-size:14px;
@@ -572,8 +729,7 @@ body::after{
 #badge-bg.on{display:block}
 
 @keyframes su{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
-.su,.su-ready{animation:su .32s cubic-bezier(.16,1,.3,1) both}
-.su1{animation-delay:.04s}.su2{animation-delay:.09s}.su3{animation-delay:.14s}
+.su-ready{animation:su .32s cubic-bezier(.16,1,.3,1) both}
 .su{animation:su .25s ease both}
 .su1{animation-delay:.04s}.su2{animation-delay:.08s}.su3{animation-delay:.12s}
 
@@ -682,7 +838,7 @@ body::after{
 .wkg-day{
   flex:1;border-radius:10px;padding:10px 4px 8px;
   display:flex;flex-direction:column;align-items:center;gap:5px;
-  border:1px solid var(--card-border);background:rgba(255,255,255,.03);
+  border:1px solid var(--card-border);background:var(--se-bg);
   cursor:pointer;transition:all .15s;position:relative;overflow:hidden;
   min-width:0;
 }
@@ -695,7 +851,7 @@ body::after{
 .wkg-day-ico{font-size:18px;line-height:1}
 .wkg-day-type{font-size:8px;color:var(--t2);text-align:center;line-height:1.2;font-family:'JetBrains Mono',monospace;letter-spacing:-.02em}
 .wkg-day.done .wkg-day-type{color:var(--green)}
-.wkg-ck{width:16px;height:16px;border-radius:50%;border:1.5px solid rgba(255,255,255,.15);
+.wkg-ck{width:16px;height:16px;border-radius:50%;border:1.5px solid var(--ck-border);
   display:flex;align-items:center;justify-content:center;font-size:9px;color:transparent;
   flex-shrink:0;transition:all .2s}
 .wkg-day.done .wkg-ck{background:var(--a1);border-color:var(--a1);color:var(--bg)}
@@ -703,7 +859,7 @@ body::after{
   padding-top:12px;border-top:1px solid var(--card-border)}
 .wkg-progress-wrap{flex:1;margin-right:12px}
 .wkg-prog-label{font-size:11px;color:var(--t2);margin-bottom:4px}
-.wkg-prog-bar{height:4px;background:rgba(255,255,255,.08);border-radius:2px;overflow:hidden}
+.wkg-prog-bar{height:4px;background:var(--progress-track);border-radius:2px;overflow:hidden}
 .wkg-prog-fill{height:100%;border-radius:2px;transition:width .7s cubic-bezier(.16,1,.3,1)}
 .wkg-title{font-family:'Playfair Display',Georgia,serif!important}
 .wkg-km{text-align:right;font-family:'Barlow Condensed',sans-serif}
@@ -712,6 +868,39 @@ body::after{
 </style>
 </head>
 <body>
+<!-- SVG topo animé — fond génératif, fixed, sous tout -->
+<svg id="topo-canvas" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 390 844" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+  <defs>
+    <filter id="topo-blur"><feGaussianBlur stdDeviation="1.2"/></filter>
+  </defs>
+  <g id="topo-layer-1" filter="url(#topo-blur)">
+    <ellipse cx="320" cy="680" rx="310" ry="130" fill="none" stroke="#7cb87a" stroke-width="1" opacity=".5"/>
+    <ellipse cx="320" cy="680" rx="250" ry="100" fill="none" stroke="#7cb87a" stroke-width=".8" opacity=".4"/>
+    <ellipse cx="320" cy="680" rx="190" ry="72"  fill="none" stroke="#7cb87a" stroke-width=".7" opacity=".35"/>
+    <ellipse cx="320" cy="680" rx="130" ry="48"  fill="none" stroke="#7cb87a" stroke-width=".6" opacity=".28"/>
+    <ellipse cx="320" cy="680" rx="72"  ry="28"  fill="none" stroke="#7cb87a" stroke-width=".5" opacity=".2"/>
+    <ellipse cx="70"  cy="180" rx="200" ry="90"  fill="none" stroke="#7cb87a" stroke-width=".9" opacity=".3"/>
+    <ellipse cx="70"  cy="180" rx="150" ry="65"  fill="none" stroke="#7cb87a" stroke-width=".7" opacity=".22"/>
+    <ellipse cx="70"  cy="180" rx="100" ry="42"  fill="none" stroke="#7cb87a" stroke-width=".6" opacity=".16"/>
+  </g>
+  <g id="topo-layer-2" filter="url(#topo-blur)">
+    <ellipse cx="195" cy="320" rx="280" ry="110" fill="none" stroke="#6b9ab8" stroke-width=".9" opacity=".3"/>
+    <ellipse cx="195" cy="320" rx="220" ry="84"  fill="none" stroke="#6b9ab8" stroke-width=".7" opacity=".22"/>
+    <ellipse cx="195" cy="320" rx="160" ry="60"  fill="none" stroke="#6b9ab8" stroke-width=".6" opacity=".16"/>
+    <ellipse cx="195" cy="320" rx="100" ry="38"  fill="none" stroke="#6b9ab8" stroke-width=".5" opacity=".12"/>
+    <ellipse cx="360" cy="520" rx="140" ry="60"  fill="none" stroke="#6b9ab8" stroke-width=".7" opacity=".18"/>
+    <ellipse cx="360" cy="520" rx="90"  ry="38"  fill="none" stroke="#6b9ab8" stroke-width=".5" opacity=".12"/>
+  </g>
+  <g id="topo-layer-3" filter="url(#topo-blur)">
+    <ellipse cx="50"  cy="540" rx="180" ry="75"  fill="none" stroke="#c8956c" stroke-width=".8" opacity=".22"/>
+    <ellipse cx="50"  cy="540" rx="130" ry="54"  fill="none" stroke="#c8956c" stroke-width=".6" opacity=".16"/>
+    <ellipse cx="50"  cy="540" rx="82"  ry="33"  fill="none" stroke="#c8956c" stroke-width=".5" opacity=".12"/>
+    <ellipse cx="340" cy="130" rx="160" ry="65"  fill="none" stroke="#c8956c" stroke-width=".7" opacity=".18"/>
+    <ellipse cx="340" cy="130" rx="110" ry="44"  fill="none" stroke="#c8956c" stroke-width=".5" opacity=".12"/>
+    <ellipse cx="340" cy="130" rx="62"  ry="25"  fill="none" stroke="#c8956c" stroke-width=".4" opacity=".08"/>
+  </g>
+</svg>
+
 <div id="app">
 
 <!-- HEADER -->
@@ -812,8 +1001,12 @@ body::after{
     <div class="st-pad">
       <div class="shd" style="margin-top:12px">VUE D'ENSEMBLE</div>
       <div class="st-gr" id="stGrid"></div>
+      <div class="shd">ÉVOLUTION KM</div>
+      <div class="trend-wrap g" id="trendCard"></div>
       <div class="shd">VOLUME HEBDO</div>
       <div class="vw g" id="volWrap"><div class="vb" id="volBars"></div></div>
+      <div class="shd">RYTHME PAR SEMAINE</div>
+      <div class="pace-card g" id="paceCard"></div>
       <div class="shd">PAR PHASE</div>
       <div id="phRows"></div>
     </div>
@@ -844,12 +1037,14 @@ body::after{
 </div><!-- /content -->
 
 <!-- TABBAR -->
-<div id="tabbar">
-  <button class="tab active" data-v="home"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>Accueil</button>
-  <button class="tab" data-v="plan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Programme</button>
-  <button class="tab" data-v="stats"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Stats</button>
-  <button class="tab" data-v="badges"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>Trophées</button>
-  <button class="tab" data-v="allures"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Allures</button>
+<div id="tabbar" role="tablist" aria-label="Navigation principale">
+  <!-- Blob liquide — déplacé par JS -->
+  <div id="tab-blob"></div>
+  <button class="tab active" data-v="home" role="tab" aria-selected="true" aria-label="Accueil"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>Accueil</button>
+  <button class="tab" data-v="plan" role="tab" aria-selected="false" aria-label="Programme d'entraînement"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Programme</button>
+  <button class="tab" data-v="stats" role="tab" aria-selected="false" aria-label="Statistiques"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Stats</button>
+  <button class="tab" data-v="badges" role="tab" aria-selected="false" aria-label="Trophées et badges"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>Trophées</button>
+  <button class="tab" data-v="allures" role="tab" aria-selected="false" aria-label="Référentiel d'allures"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Allures</button>
 </div>
 </div><!-- /app -->
 
@@ -1050,6 +1245,7 @@ try{const s=+localStorage.getItem('t20_selW');if(s>=1&&s<=12)selW=s;}catch(e){}
 
 let activeV='home',prevBadges=new Set(ulk(done).map(b=>b.id));
 let _planDirty=false; // true quand done{} a changé hors Plan → force re-render à la prochaine visite
+const _scrollMem={}; // mémorise scrollTop par vue : {home:0, plan:0, stats:0, badges:0, allures:0}
 const save=()=>{try{localStorage.setItem('t20_v4',JSON.stringify(done))}catch(e){}};
 const saveSelW=()=>{try{localStorage.setItem('t20_selW',String(selW))}catch(e){}};
 
@@ -1593,14 +1789,18 @@ function renderChips(doScroll=false){
     return`<button class="wk${isActive?' active':''}" data-w="${w.n}" data-s="${st}"><span class="wk-dot"></span>S${w.n}</button>`;
   }).join('');
   el.querySelectorAll('.wk').forEach(b=>{
-    b.addEventListener('click',()=>{selW=+b.dataset.w;saveSelW();renderPlan(true);});
+    b.addEventListener('click',()=>{
+      _scrollMem['plan']=0; // nouvelle semaine → reset scroll
+      selW=+b.dataset.w;saveSelW();renderPlan(true);
+    });
   });
   if(doScroll){const a=el.querySelector('.wk.active');if(a)a.scrollIntoView({behavior:'smooth',inline:'center',block:'nearest'});}
 }
 
 function renderPlan(fromChip=false){
   const cont=document.getElementById('content');
-  const sy=cont.scrollTop;
+  // Sauvegarde du scroll seulement quand appelé depuis switchV (pas depuis chip/swipe)
+  const sy=fromChip?0:(cont.scrollTop);
   renderChips(fromChip);
   const w=WEEKS[selW-1],ph=gPh(w),p=PHASES[ph];
   const wk=Object.keys(w.s).map(dy=>`${w.n}-${dy}`);
@@ -1655,7 +1855,8 @@ function renderPlan(fromChip=false){
           <div class="se-ri">
             <span class="se-xp">+${a.x} XP</span>
             <span class="se-km">${s.k} km</span>
-            <button class="ck ${dn?'on':''} ${isr?'race-on':''}" data-k="${k}" data-xp="${a.x}" data-wn="${w.n}" data-dy="${dy}">✓</button>
+            <button class="ck ${dn?'on':''} ${isr?'race-on':''}" data-k="${k}" data-xp="${a.x}" data-wn="${w.n}" data-dy="${dy}"
+              aria-label="${dn?'Décocher':'Valider'} : ${a.l} ${DAY[dy]}" aria-pressed="${dn}">✓</button>
           </div>
         </div>
         <div class="se-ty" style="color:${dn?'var(--green)':a.c}">${dn?'✓ ':''}${a.l}</div>
@@ -1666,8 +1867,9 @@ function renderPlan(fromChip=false){
         </div>
       </div>`;
     }).join('')}`;
-  // restore scroll — no jump
-  cont.scrollTop=sy;
+  // restore scroll — seulement si appel interne (chip/swipe/checkbox), pas depuis switchV
+  if(fromChip) cont.scrollTop=0;
+  else if(sy>0) cont.scrollTop=sy;
   // bind buttons
   document.getElementById('planBody').querySelectorAll('.ck').forEach(btn=>{
     btn.addEventListener('click',e=>{
@@ -1745,14 +1947,90 @@ function updateSessCard(key){
   const pp=card.querySelector('.sp:first-child');
   if(pp){pp.style.color=dn?'var(--green)':a.c;pp.style.borderColor=dn?'var(--green)':a.c;}
   btn.classList.toggle('on',dn);
+  btn.setAttribute('aria-pressed',dn);
+  btn.setAttribute('aria-label',`${dn?'Décocher':'Valider'} : ${a.l}`);
   if(isr)btn.classList.toggle('race-on',dn);
 }
 
 /* ══════════════════════════════════════════
    RENDER STATS
 ══════════════════════════════════════════ */
+// Construit le SVG de tendance km réalisés vs programmés
+function buildTrendSVG(){
+  const W=320,H=90,pad={t:8,r:8,b:20,l:28};
+  const inner={w:W-pad.l-pad.r,h:H-pad.t-pad.b};
+  const maxKm=Math.max(...WEEKS.map(w=>w.km),1);
+  const pts=WEEKS.map((w,i)=>{
+    const dnKm=Object.entries(w.s).filter(([dy])=>done[`${w.n}-${dy}`]).reduce((a,[,s])=>a+s.k,0);
+    const x=pad.l+i/(WEEKS.length-1)*inner.w;
+    const yPlan=pad.t+inner.h*(1-w.km/maxKm);
+    const yDone=pad.t+inner.h*(1-dnKm/maxKm);
+    return{x,yPlan,yDone,km:w.km,dnKm,n:w.n,ph:gPh(w)};
+  });
+
+  // Ligne programmé
+  const planPath=`M${pts.map(p=>`${p.x.toFixed(1)},${p.yPlan.toFixed(1)}`).join('L')}`;
+  // Ligne réalisé (seulement semaines où on a couru)
+  const donePts=pts.filter(p=>p.dnKm>0);
+  const donePath=donePts.length>1?`M${donePts.map(p=>`${p.x.toFixed(1)},${p.yDone.toFixed(1)}`).join('L')}`:'';
+  // Zone remplie sous réalisé
+  const doneArea=donePts.length>1
+    ?`M${donePts[0].x.toFixed(1)},${(pad.t+inner.h).toFixed(1)} `+
+      `L${donePts.map(p=>`${p.x.toFixed(1)},${p.yDone.toFixed(1)}`).join('L')} `+
+      `L${donePts[donePts.length-1].x.toFixed(1)},${(pad.t+inner.h).toFixed(1)} Z`
+    :'';
+
+  // Graduations Y (0, max/2, max)
+  const yTicks=[0,Math.round(maxKm/2),maxKm];
+  const yLabels=yTicks.map(v=>{
+    const y=pad.t+inner.h*(1-v/maxKm);
+    return`<text x="${pad.l-4}" y="${y.toFixed(1)}" text-anchor="end" dominant-baseline="middle"
+      font-size="7" fill="rgba(143,166,140,.5)" font-family="JetBrains Mono,monospace">${v}</text>
+      <line x1="${pad.l}" y1="${y.toFixed(1)}" x2="${(pad.l+inner.w).toFixed(1)}" y2="${y.toFixed(1)}"
+        stroke="rgba(255,255,255,.04)" stroke-width="1"/>`;
+  }).join('');
+
+  // Marqueurs semaine actuelle
+  const curPt=pts[currentW-1];
+  const curMark=`<circle cx="${curPt.x.toFixed(1)}" cy="${curPt.yPlan.toFixed(1)}" r="3.5"
+    fill="rgba(124,184,122,.2)" stroke="#7cb87a" stroke-width="1.5"/>`;
+
+  // Points réalisés
+  const doneMarks=donePts.map(p=>`<circle cx="${p.x.toFixed(1)}" cy="${p.yDone.toFixed(1)}" r="2.5"
+    fill="${PHASES[p.ph].c}" stroke="none" data-w="${p.n}" data-km="${p.dnKm}"/>`).join('');
+
+  return{
+    svg:`<svg class="trend-svg" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none"
+        style="height:${H}px;overflow:visible">
+      <defs>
+        <linearGradient id="doneGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#7cb87a" stop-opacity=".25"/>
+          <stop offset="100%" stop-color="#7cb87a" stop-opacity="0"/>
+        </linearGradient>
+      </defs>
+      ${yLabels}
+      ${doneArea?`<path d="${doneArea}" fill="url(#doneGrad)"/>`:''}
+      <path d="${planPath}" fill="none" stroke="rgba(124,184,122,.2)" stroke-width="1.5" stroke-dasharray="3,3"/>
+      ${donePath?`<path d="${donePath}" fill="none" stroke="#7cb87a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>`:''}
+      ${curMark}
+      ${doneMarks}
+    </svg>`,
+    pts
+  };
+}
+
 function renderStats(){
   const cnt=Object.values(done).filter(Boolean).length,km=kmD(done),xp=xpTot(done),sk=mxS(done);
+
+  // ── Calcul tendance : moyenne km/sem sur les 4 dernières semaines réalisées ──
+  const doneWeeks=WEEKS.filter(w=>Object.keys(w.s).some(dy=>done[`${w.n}-${dy}`]));
+  const last4=doneWeeks.slice(-4);
+  const avgKm4=last4.length
+    ?Math.round(last4.reduce((a,w)=>a+Object.entries(w.s).filter(([dy])=>done[`${w.n}-${dy}`]).reduce((b,[,s])=>b+s.k,0),0)/last4.length)
+    :0;
+  const totalPlanKm=WEEKS.reduce((a,w)=>a+w.km,0);
+  const pctPlan=Math.round((km/totalPlanKm)*100);
+
   const _statRows=[
     {ic:'🏅',lb:'Séances validées',to:cnt,  suf:'',    extra:`/${TOTAL}`,ac:false},
     {ic:'🗺️',lb:'Km courus',       to:km,   suf:' km', extra:'',         ac:true},
@@ -1771,20 +2049,92 @@ function renderStats(){
       animCount(el,0,+el.dataset.to,700,el.dataset.suf,el.dataset.extra);
     });
   });
-  const maxKm=Math.max(...WEEKS.map(w=>w.km)); // 70
+
+  // ── Graphe de tendance ──
+  const {svg:tSvg,pts:tPts}=buildTrendSVG();
+  const trendEl=document.getElementById('trendCard');
+  if(trendEl){
+    trendEl.innerHTML=`
+      <div class="trend-hdr">
+        <div class="trend-title">Évolution km</div>
+        <div class="trend-legend">
+          <div class="trend-leg"><div class="trend-leg-dot" style="background:#7cb87a"></div>Réalisé</div>
+          <div class="trend-leg"><div class="trend-leg-dot" style="background:rgba(124,184,122,.3)"></div>Programmé</div>
+        </div>
+      </div>
+      <div class="trend-svg-wrap" id="trendSvgWrap">${tSvg}</div>
+      <div class="trend-tooltip" id="trendTip"></div>
+      ${avgKm4>0?`<div style="display:flex;justify-content:space-between;margin-top:10px;padding-top:8px;border-top:1px solid var(--card-border)">
+        <div style="font-size:11px;color:var(--t2)">Moy. 4 dern. sem.</div>
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:800;color:var(--a1)">${avgKm4} km/sem</div>
+      </div>`:''}
+      <div style="display:flex;justify-content:space-between;margin-top:6px">
+        <div style="font-size:11px;color:var(--t2)">${km} km / ${totalPlanKm} km au total</div>
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;color:var(--t2)">${pctPlan}% du plan</div>
+      </div>`;
+    // Tooltip interactif sur les points
+    const svgEl=trendEl.querySelector('svg');
+    const tipEl=document.getElementById('trendTip');
+    if(svgEl&&tipEl){
+      svgEl.querySelectorAll('circle[data-km]').forEach(c=>{
+        c.style.cursor='pointer';
+        c.addEventListener('click',()=>{
+          const wn=+c.dataset.w,km=+c.dataset.km;
+          const r=c.getBoundingClientRect(),wr=trendEl.getBoundingClientRect();
+          tipEl.textContent=`S${wn} · ${km} km courus`;
+          tipEl.style.left=`${r.left-wr.left}px`;
+          tipEl.style.top=`${r.top-wr.top-34}px`;
+          tipEl.style.opacity='1';
+          setTimeout(()=>tipEl.style.opacity='0',2000);
+        });
+      });
+    }
+  }
+
+  // ── Barres volume hebdo ──
+  const maxKm=Math.max(...WEEKS.map(w=>w.km));
   document.getElementById('volBars').innerHTML=WEEKS.map(w=>{
-    const p=PHASES[gPh(w)],act=selW===w.n;
+    const p=PHASES[gPh(w)],act=currentW===w.n;
     const pct=Math.round((w.km/maxKm)*100);
     const dnKm=Object.entries(w.s).filter(([dy])=>done[`${w.n}-${dy}`]).reduce((a,[,s])=>a+s.k,0);
     const dnPct=w.km>0?Math.round((dnKm/w.km)*100):0;
-    return`<div class="vc" data-w="${w.n}" title="S${w.n}: ${w.km}km (${dnKm}km courus)">
+    return`<div class="vc" data-w="${w.n}" title="S${w.n}: ${w.km}km programmés · ${dnKm}km courus"
+      role="button" aria-label="Semaine ${w.n} : ${dnKm} sur ${w.km} km. Aller au programme.">
       <div class="vba-wrap" style="height:${pct}%;width:100%;position:relative;border-radius:3px 3px 0 0;overflow:hidden;background:${p.c+'28'}">
-        <div class="vba" style="position:absolute;bottom:0;left:0;right:0;height:${dnPct}%;background:${p.c};border-radius:3px 3px 0 0;min-height:${dnKm>0?2:0}px"></div>
+        <div class="vba" style="position:absolute;bottom:0;left:0;right:0;height:${dnPct}%;background:${p.c};border-radius:3px 3px 0 0;min-height:${dnKm>0?2:0}px;transition:height .8s cubic-bezier(.4,0,.2,1)"></div>
       </div>
-      <span class="vl" style="color:${act?p.c:'var(--t3)'};font-weight:${act?700:400}">S${w.n}</span>
+      <span class="vl" style="color:${act?p.c:'var(--t3)'};font-weight:${act?700:400}">${act?'▸':''} S${w.n}</span>
     </div>`;
   }).join('');
-  document.getElementById('volBars').querySelectorAll('.vc').forEach(el=>el.addEventListener('click',()=>{selW=+el.dataset.w;saveSelW();switchV('plan');}));
+  document.getElementById('volBars').querySelectorAll('.vc').forEach(el=>el.addEventListener('click',()=>{
+    _scrollMem['plan']=0;
+    selW=+el.dataset.w;saveSelW();switchV('plan');
+  }));
+
+  // ── Rythme hebdo : table km réalisés/programmés par semaine ──
+  const paceEl=document.getElementById('paceCard');
+  if(paceEl){
+    const maxPaceKm=Math.max(...WEEKS.map(w=>w.km));
+    paceEl.innerHTML=WEEKS.map(w=>{
+      const dnKm=Object.entries(w.s).filter(([dy])=>done[`${w.n}-${dy}`]).reduce((a,[,s])=>a+s.k,0);
+      const pct=Math.round((dnKm/maxPaceKm)*100);
+      const planPct=Math.round((w.km/maxPaceKm)*100);
+      const p=PHASES[gPh(w)];
+      const isNow=currentW===w.n;
+      return`<div class="pace-row" style="${isNow?'opacity:1':'opacity:.7'}">
+        <div class="pace-wk" style="color:${isNow?p.c:'var(--t3)'}">${isNow?'▶':''}S${w.n}</div>
+        <div class="pace-bar-wrap">
+          <div class="pace-bar-plan" style="width:${planPct}%;background:${p.c}"></div>
+          <div class="pace-bar-prog" style="width:${pct}%;background:${p.c}"></div>
+        </div>
+        <div>
+          <div class="pace-km" style="color:${dnKm>0?p.c:'var(--t3)'}">${dnKm>0?dnKm:'-'}<span style="font-size:9px;color:var(--t3);font-family:'JetBrains Mono',monospace;font-weight:400">/${w.km}</span></div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  // ── Par phase ──
   document.getElementById('phRows').innerHTML=Object.entries(PHASES).map(([k,p])=>{
     const pw=WEEKS.filter(w=>p.w.includes(w.n));
     const tot=pw.reduce((a,w)=>a+Object.keys(w.s).length,0);
@@ -1833,7 +2183,7 @@ function renderBadges(){
 ══════════════════════════════════════════ */
 function renderAllures(){
   document.getElementById('alCards').innerHTML=Object.entries(AL).map(([k,a])=>{
-    const bars=Array.from({length:5},(_,i)=>`<div class="al-b" style="height:${(i+1)*4}px;background:${i<a.e?a.c:'rgba(255,255,255,.1)'}"></div>`).join('');
+    const bars=Array.from({length:5},(_,i)=>`<div class="al-b" style="height:${(i+1)*4}px;background:${i<a.e?a.c:'var(--progress-track)'}"></div>`).join('');
     return`<div class="alc g"><div class="al-s" style="background:${a.c}"></div>
       <div style="flex:1"><div class="al-k" style="color:${a.c}">${k}</div>
         <div class="al-p" style="color:${a.c}">${a.p}</div><div class="al-f">${a.f}</div>
@@ -1862,32 +2212,93 @@ function checkBadges(){
    NAVIGATION
 ══════════════════════════════════════════ */
 function switchV(name){
+  // Sauvegarde scroll de la vue quittée
+  const cont=document.getElementById('content');
+  _scrollMem[activeV]=cont.scrollTop;
+
   activeV=name;
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
   const nextView=document.getElementById(`view-${name}`);
   nextView.classList.add('active');
-  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
-  document.querySelector(`[data-v="${name}"]`).classList.add('active');
+  document.querySelectorAll('.tab').forEach(b=>{
+    const sel=b.dataset.v===name;
+    b.classList.toggle('active',sel);
+    b.setAttribute('aria-selected',sel);
+  });
+  updateBlob(name); // ← déplace le blob liquide
+
   if(name==='stats')renderStats();
   else if(name==='badges')renderBadges();
   else if(name==='plan'){
-    // Si done{} a changé depuis le dernier render du Plan → re-render complet
-    if(_planDirty){renderPlan(true);_planDirty=false;}
-    else renderPlan(true);
+    // fromChip=false : switchV gère le scroll via _scrollMem, pas renderPlan
+    if(_planDirty){renderPlan(false);_planDirty=false;}
+    else renderPlan(false);
   }
   else if(name==='home')refreshHome();
   else if(name==='allures')renderAllures();
-  // Scroll reset AFTER render to avoid Safari layout glitch
+
   requestAnimationFrame(()=>{
-    document.getElementById('content').scrollTop=0;
-    // Staggered entrance animation — trigger after render
+    // Restauration du scroll mémorisé (0 si première visite)
+    cont.scrollTop=_scrollMem[name]||0;
+    // Staggered entrance animation
     nextView.classList.remove('view-enter');
-    void nextView.offsetWidth; // force reflow
+    void nextView.offsetWidth;
     nextView.classList.add('view-enter');
     setTimeout(()=>nextView.classList.remove('view-enter'),600);
   });
 }
+/* ══════════════════════════════════════════
+   LIQUID TABBAR BLOB
+══════════════════════════════════════════ */
+const _blob=document.getElementById('tab-blob');
+
+function moveBlobTo(btn){
+  if(!_blob||!btn)return;
+  const tbr=document.getElementById('tabbar').getBoundingClientRect();
+  const br=btn.getBoundingClientRect();
+  // Position relative au tabbar
+  const left=br.left-tbr.left;
+  const width=br.width;
+  _blob.style.left=left+4+'px';
+  _blob.style.width=width-8+'px';
+  // Squash & stretch
+  _blob.classList.remove('blob-anim');
+  void _blob.offsetWidth; // reflow
+  _blob.classList.add('blob-anim');
+}
+
+function initBlob(){
+  // Position initiale sans animation (premier rendu)
+  const activeTab=document.querySelector('.tab.active');
+  if(!activeTab||!_blob)return;
+  _blob.style.transition='none';
+  moveBlobTo(activeTab);
+  // Réactive la transition après le premier frame
+  requestAnimationFrame(()=>{
+    requestAnimationFrame(()=>{
+      _blob.style.transition='';
+    });
+  });
+}
+
+// Appelé par switchV après le changement d'onglet
+function updateBlob(name){
+  const btn=document.querySelector(`.tab[data-v="${name}"]`);
+  moveBlobTo(btn);
+}
+
+// Resize — repositionner le blob sans animation
+window.addEventListener('resize',()=>{
+  const activeTab=document.querySelector('.tab.active');
+  if(!activeTab||!_blob)return;
+  const was=_blob.style.transition;
+  _blob.style.transition='none';
+  moveBlobTo(activeTab);
+  requestAnimationFrame(()=>_blob.style.transition=was);
+},{passive:true});
+
 document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>switchV(b.dataset.v)));
+
 
 /* ══════════════════════════════════════════
    INIT
@@ -1902,11 +2313,21 @@ function applyTheme(dark){
   document.documentElement.classList.toggle('light',!dark);
   document.getElementById('themeIco').textContent=dark?'🌙':'☀️';
   try{localStorage.setItem('theme',dark?'dark':'light')}catch(e){}
-  // Update meta theme-color for iOS status bar
   const meta=document.querySelector('meta[name="theme-color"]');
   if(meta)meta.content=dark?'#0d1208':'#f5f0e8';
+  // Repositionner le blob après changement de thème (couleurs changent)
+  requestAnimationFrame(()=>{
+    const activeTab=document.querySelector('.tab.active');
+    if(activeTab&&_blob){
+      const was=_blob.style.transition;
+      _blob.style.transition='none';
+      moveBlobTo(activeTab);
+      requestAnimationFrame(()=>_blob.style.transition=was);
+    }
+  });
 }
 function toggleTheme(){applyTheme(!isDark)}
+// Appliquer le thème EN PREMIER, avant tout render
 applyTheme(isDark);
 
 
@@ -1965,6 +2386,7 @@ function swipePlan(dir){
   setTimeout(()=>{
     body.classList.remove('swipe-out-left','swipe-out-right');
     selW=newW;
+    _scrollMem['plan']=0; // nouvelle semaine → reset scroll
     saveSelW();
     renderPlan(true);
     // animate in
@@ -1979,18 +2401,24 @@ function swipePlan(dir){
 
 function initPlanSwipe(){
   const el=document.getElementById('sub-plan');
-  el.addEventListener('touchstart',e=>{_swX=e.touches[0].clientX;_swActive=true;},{passive:true});
+  let _swStartY=0;
+  el.addEventListener('touchstart',e=>{
+    _swX=e.touches[0].clientX;
+    _swStartY=e.touches[0].clientY;
+    _swActive=true;
+  },{passive:true});
   el.addEventListener('touchmove',e=>{
     if(!_swActive)return;
-    // Prevent swipe if horizontal scroll is happening on chips row
-    const dy=Math.abs(e.touches[0].clientY-e.touches[0].clientY);
-    // just track
+    // Annuler le swipe si le geste est plus vertical qu'horizontal
+    const dx=Math.abs(e.touches[0].clientX-_swX);
+    const dy=Math.abs(e.touches[0].clientY-_swStartY);
+    if(dy>dx*1.5)_swActive=false; // scroll vertical — annuler
   },{passive:true});
   el.addEventListener('touchend',e=>{
     if(!_swActive){return;}
     _swActive=false;
     const dx=e.changedTouches[0].clientX-_swX;
-    if(Math.abs(dx)<55)return; // threshold
+    if(Math.abs(dx)<55)return;
     swipePlan(dx<0?'left':'right');
   },{passive:true});
 }
@@ -2115,8 +2543,8 @@ function renderCalDetail(){
 
 function calGo(m,y){
   const minM=6,maxM=8;
-  if(y===2026&&m<minM||y<2026)return;
-  if(y===2026&&m>maxM||y>2026)return;
+  if((y===2026&&m<minM)||(y<2026))return;
+  if((y===2026&&m>maxM)||(y>2026))return;
   calM=m;calY=y;calSel=null;renderCal();
 }
 
@@ -2173,16 +2601,20 @@ function setPlanTab(tab){
 ══════════════════════════════════════════ */
 function scheduleMidnightRefresh(){
   const now=new Date();
-  const tomorrow=new Date(now.getFullYear(),now.getMonth(),now.getDate()+1,0,0,10); // 00:00:10
+  const tomorrow=new Date(now.getFullYear(),now.getMonth(),now.getDate()+1,0,0,10);
   const msUntilMidnight=tomorrow-now;
   setTimeout(()=>{
-    // Mise à jour silencieuse des éléments dépendants du jour
-    document.getElementById('cdN').textContent=cdDays();
-    if(activeV==='home'){
-      renderTipCard(); // nouveau conseil du jour
-      renderHdr();     // streak recalculé
-    }
-    scheduleMidnightRefresh(); // replanifier pour le lendemain
+    // Mise à jour silencieuse — sans toucher au scroll
+    const cdEl=document.getElementById('cdN');
+    if(cdEl)cdEl.textContent=cdDays();
+    // currentW peut avoir changé à minuit (passage à la semaine suivante)
+    const prog=new Date(2026,6,6);
+    const diff=Math.floor((new Date()-prog)/864e5);
+    if(diff>=0&&diff<84)currentW=Math.min(12,Math.floor(diff/7)+1);
+    // Re-render header uniquement (streak, XP) — pas de scroll reset
+    renderHdr();
+    // Mettre à jour le tip en mémoire uniquement — sera affiché au prochain refresh
+    scheduleMidnightRefresh();
   },msUntilMidnight);
 }
 scheduleMidnightRefresh();
@@ -2194,6 +2626,8 @@ renderAllures();
 
 // 4. Render synchronously — full home init
 refreshHome();
+// Init blob liquide
+requestAnimationFrame(initBlob);
 // Animation d'entrée initiale sur la vue Home
 requestAnimationFrame(()=>{
   const homeView=document.getElementById('view-home');

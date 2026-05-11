@@ -24,23 +24,10 @@
   --a2:#e8843a;    /* Orange — fractionné long, effort */
   --a2bg:rgba(232,132,58,.15);
   --a3:#d4f0b0;    /* Vert clair — highlight */
-  --a4:#7a9a78;
-
   /* ── Ambre — XP, streaks, compte à rebours, niveaux ── */
   --amber:#e8a030;
   --amber-bg:rgba(232,160,48,.15);
   --amber-border:rgba(232,160,48,.3);
-
-  /* ── Couleurs sémantiques séances ── */
-  --c-ef:#5aaa58;        /* EF — vert */
-  --c-frac-c:#e05a5a;    /* Fractionné court — rouge corail */
-  --c-frac-l:#e8843a;    /* Fractionné long — orange */
-  --c-seuil:#e8a030;     /* Seuil — ambre */
-  --c-cote:#a060c8;      /* Côte — violet */
-  --c-as21:#4a8fd4;      /* AS21 — bleu électrique */
-  --c-longue:#7a6abf;    /* Sortie longue — violet doux */
-  --c-deblo:#38b0b0;     /* Déblocage — cyan */
-  --c-course:#d4a030;    /* Course — or */
 
   /* ── Phases ── */
   --ph-dev:#5aaa58;
@@ -50,7 +37,7 @@
 
   /* ── Divers ── */
   --tab:56px;--r:12px;--r-lg:16px;
-  --green:#7cb87a;
+  --green:#5aaa58;        /* synced with --a1 dark */
 
   /* ── Dark mode (forêt noire) ── */
   --bg:#0d1208;
@@ -85,7 +72,6 @@
   --ck-border:rgba(168,190,166,.35);   /* checkbox border visible */
   --sp-fc-color:var(--t2);
   --sp-fc-border:rgba(168,190,166,.28);
-  --grain:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
 }
 
 /* ── Light mode — Parchemin & forêt ── */
@@ -169,12 +155,7 @@ body{
     radial-gradient(ellipse 50% 50% at 100% 40%,var(--glow-b) 0%,transparent 65%),
     radial-gradient(ellipse 50% 50% at 50% 100%,var(--glow-c) 0%,transparent 65%);
 }
-/* Subtle grain overlay on body */
-body::after{
-  content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
-  background-image:var(--grain);background-size:200px 200px;
-  opacity:.6;mix-blend-mode:overlay;
-}
+/* Grain overlay removed — remplacé par le canvas bruit de Perlin */
 #app{display:flex;flex-direction:column;height:100vh;height:-webkit-fill-available;position:relative;z-index:1}
 #content{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;
   padding-bottom:calc(var(--tab) + env(safe-area-inset-bottom, 34px) + 12px);scrollbar-width:none}
@@ -191,7 +172,6 @@ body::after{
    HEADER — Alpine
 ══════════════════════════════ */
 #hdr{
-  padding-top:max(env(safe-area-inset-top), 20px);
   padding-top:max(env(safe-area-inset-top, 47px), 20px);
   padding-left:16px;padding-right:16px;padding-bottom:10px;
   background:var(--hdr-bg);
@@ -328,49 +308,54 @@ body::after{
 }
 .shd::after{content:'';flex:1;height:1px;background:var(--card-border)}
 
-/* ── HOME — Alpine hero ── */
+/* ── Hero "Objectif Course" — cycle jour/nuit canvas ── */
 .hero{
-  margin:10px 16px 0;border-radius:var(--r-lg);padding:18px;
+  margin:10px 16px 0;border-radius:var(--r-lg);
   position:relative;overflow:hidden;
-  background:linear-gradient(135deg,rgba(124,184,122,.18),var(--bg2) 70%);
-  border:1px solid rgba(124,184,122,.22);
-  backdrop-filter:blur(28px);-webkit-backdrop-filter:blur(28px);
-  box-shadow:0 8px 40px rgba(0,0,0,.35),inset 0 1px 0 var(--card-shine);
-  /* Fond solide derrière le gradient pour bloquer le bruit */
+  border:1px solid rgba(255,255,255,.08);
+  box-shadow:0 8px 40px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.06);
   isolation:isolate;
+  min-height:230px;
 }
-/* Topographic contour lines — SVG inline */
-.hero::before{
-  content:'';position:absolute;inset:0;opacity:.04;pointer-events:none;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='180'%3E%3Cellipse cx='250' cy='90' rx='220' ry='75' fill='none' stroke='%237cb87a' stroke-width='1'/%3E%3Cellipse cx='250' cy='90' rx='180' ry='58' fill='none' stroke='%237cb87a' stroke-width='1'/%3E%3Cellipse cx='250' cy='90' rx='140' ry='42' fill='none' stroke='%237cb87a' stroke-width='1'/%3E%3Cellipse cx='250' cy='90' rx='100' ry='28' fill='none' stroke='%237cb87a' stroke-width='1'/%3E%3Cellipse cx='250' cy='90' rx='60' ry='16' fill='none' stroke='%237cb87a' stroke-width='1'/%3E%3C/svg%3E");
-  background-size:cover;background-position:right center;
+#hero-sky{
+  position:absolute;inset:0;z-index:0;
+  border-radius:var(--r-lg);
 }
+
+/* Contenu textuel au-dessus du canvas */
+.hero-content{
+  position:relative;z-index:1;
+  padding:18px;
+}
+
 .hero-sup{
   font-family:'DM Sans',sans-serif;font-size:10px;font-weight:600;
-  color:var(--a1);text-transform:uppercase;letter-spacing:.18em;margin-bottom:4px;
+  color:rgba(255,255,255,.75);text-transform:uppercase;letter-spacing:.18em;margin-bottom:4px;
   display:flex;align-items:center;gap:6px;
 }
-.hero-sup::before{content:'';width:14px;height:1px;background:var(--a1);opacity:.6}
+.hero-sup::before{content:'';width:14px;height:1px;background:var(--amber);opacity:.9}
 .hero-bd{display:flex;justify-content:space-between;align-items:flex-end}
 .hero-t{
   font-family:'Playfair Display',Georgia,serif;
   font-size:32px;font-weight:800;line-height:1.05;letter-spacing:-.01em;
+  color:#ffffff;text-shadow:0 2px 14px rgba(0,0,0,.5);
 }
-.hero-d{font-size:11px;color:var(--t2);margin-top:4px;font-style:italic}
+.hero-d{font-size:11px;color:rgba(255,255,255,.55);margin-top:4px;font-style:italic}
 .cd-n{
   font-family:'Playfair Display',Georgia,serif;
   font-size:54px;font-weight:900;color:var(--amber);line-height:1;text-align:right;
+  text-shadow:0 0 24px rgba(232,160,48,.45);
 }
-.cd-u{font-size:10px;color:var(--t2);text-align:right;letter-spacing:.1em;text-transform:uppercase;margin-top:4px}
-.hero-rw{display:flex;margin-top:14px;padding-top:14px;border-top:1px solid rgba(124,184,122,.12)}
+.cd-u{font-size:10px;color:rgba(255,255,255,.5);text-align:right;letter-spacing:.1em;text-transform:uppercase;margin-top:4px}
+.hero-rw{display:flex;margin-top:14px;padding-top:14px;border-top:1px solid rgba(255,255,255,.1)}
 .hs{flex:1;text-align:center}
-.hs+.hs{border-left:1px solid rgba(124,184,122,.12)}
-.hs-v{font-family:'Playfair Display',Georgia,serif;font-size:20px;font-weight:700;color:var(--a1)}
-.hs-l{font-size:10px;color:var(--t3);margin-top:2px;letter-spacing:.04em}
+.hs+.hs{border-left:1px solid rgba(255,255,255,.1)}
+.hs-v{font-family:'Playfair Display',Georgia,serif;font-size:20px;font-weight:700;color:#ffffff}
+.hs-l{font-size:10px;color:rgba(255,255,255,.45);margin-top:2px;letter-spacing:.04em}
 
 /* ── Next session card ── */
 .nc{margin:0 16px;border-radius:var(--r-lg);padding:16px 16px 16px 20px;position:relative;overflow:hidden}
-.nc.live{border-color:rgba(124,184,122,.3)!important;background:rgba(124,184,122,.12)!important}
+.nc.live{border-color:rgba(90,170,88,.3)!important;background:rgba(90,170,88,.12)!important}
 .nc-ac{position:absolute;left:0;top:0;bottom:0;width:4px;border-radius:4px 0 0 4px}
 .nc-ey{font-family:'DM Sans',sans-serif;font-size:10px;font-weight:600;text-transform:uppercase;
   letter-spacing:.14em;color:var(--t3);margin-bottom:5px}
@@ -379,8 +364,8 @@ body::after{
 .nc-dt{font-size:13px;color:var(--t2);line-height:1.45;margin-bottom:9px;font-style:italic}
 .nc-ps{display:flex;gap:5px;flex-wrap:wrap}
 .np{font-size:11px;font-weight:600;padding:3px 9px;border-radius:6px;
-  background:rgba(124,184,122,.08);border:1px solid rgba(124,184,122,.16);color:var(--t2)}
-.np.h{background:var(--a1bg);border-color:rgba(124,184,122,.35);color:var(--a1);font-weight:700}
+  background:rgba(90,170,88,.08);border:1px solid rgba(90,170,88,.18);color:var(--t2)}
+.np.h{background:var(--a1bg);border-color:rgba(90,170,88,.35);color:var(--a1);font-weight:700}
 
 /* Tip card */
 .tc{margin:0 16px;border-radius:var(--r-lg);padding:13px 14px;display:flex;gap:11px;align-items:flex-start;
@@ -410,7 +395,8 @@ body::after{
   font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;color:var(--t2);
   cursor:pointer;transition:all .15s;white-space:nowrap;
   backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
-.wk.active{background:var(--a1);border-color:var(--a1);color:var(--bg);font-weight:700;box-shadow:0 3px 12px rgba(124,184,122,.28)}
+.wk.active{background:var(--a1);border-color:var(--a1);color:var(--bg);font-weight:700;box-shadow:0 3px 12px rgba(90,170,88,.28)}
+:root.light .wk.active{color:#ffffff;box-shadow:0 3px 14px rgba(61,122,58,.35)}
 .wk-dot{display:none;position:absolute;top:-3px;right:-3px;width:8px;height:8px;border-radius:50%;border:1.5px solid var(--bg)}
 .wk[data-s=done] .wk-dot{display:block;background:var(--a1)}
 .wk[data-s=partial] .wk-dot{display:block;background:var(--a2)}
@@ -438,12 +424,12 @@ body::after{
 .wh-bf{height:100%;border-radius:3px;transition:width .35s cubic-bezier(.4,0,.2,1)}
 /* quote */
 .qc{border-radius:var(--r-lg);padding:18px;margin-bottom:8px;
-  background:linear-gradient(135deg,rgba(124,184,122,.18),rgba(20,30,14,.6));
-  border:1px solid rgba(124,184,122,.25);position:relative;overflow:hidden;
+  background:linear-gradient(135deg,rgba(90,170,88,.18),rgba(20,30,14,.6));
+  border:1px solid rgba(90,170,88,.25);position:relative;overflow:hidden;
   backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
   box-shadow:0 4px 24px var(--card-shadow),inset 0 1px 0 var(--card-shine)}
 .qc::before{content:'❝';position:absolute;top:-8px;left:12px;font-size:80px;
-  color:rgba(124,184,122,.1);font-family:'Playfair Display',Georgia,serif;line-height:1}
+  color:rgba(90,170,88,.1);font-family:'Playfair Display',Georgia,serif;line-height:1}
 .qc-t{font-family:'Playfair Display',Georgia,serif;font-size:17px;font-weight:700;
   line-height:1.45;font-style:italic;margin-bottom:10px;position:relative;color:var(--text)}
 .qc-a{font-size:11px;color:var(--a1);font-weight:600;letter-spacing:.08em;text-transform:uppercase}
@@ -455,9 +441,10 @@ body::after{
   transition:transform .12s}
 .se::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--tc,var(--card-border));border-radius:3px 0 0 3px}
 .se:active{transform:scale(.99)}
-.se.done{background:rgba(124,184,122,.14);border-color:rgba(124,184,122,.3)}
+.se.done{background:rgba(90,170,88,.14);border-color:rgba(90,170,88,.3)}
 :root.light .se.done{background:rgba(61,122,58,.12)!important;border-color:rgba(61,122,58,.3)!important}
 .se.done::before{background:var(--a1)}
+.se.done .se-dt{color:var(--t3);text-decoration:line-through;text-decoration-color:rgba(90,170,88,.3)}
 @keyframes rg{0%,100%{box-shadow:0 0 0 0 rgba(184,117,107,.2)}50%{box-shadow:0 0 14px 3px rgba(184,117,107,.08)}}
 .se.race{border-color:rgba(184,117,107,.4);animation:rg 2.5s ease-in-out infinite}
 .se-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}
@@ -470,13 +457,12 @@ body::after{
 .ck{width:26px;height:26px;border-radius:50%;border:2px solid var(--ck-border);
   background:transparent;display:flex;align-items:center;justify-content:center;
   cursor:pointer;font-size:13px;color:transparent;flex-shrink:0}
-.ck.on{border-color:var(--a1)!important;background:var(--a1)!important;color:var(--bg)!important;box-shadow:0 0 8px rgba(124,184,122,.4)}
+.ck.on{border-color:var(--a1)!important;background:var(--a1)!important;color:var(--bg)!important;box-shadow:0 0 8px rgba(90,170,88,.4)}
 .ck.race-on{border-color:var(--a2)!important;background:var(--a2)!important;color:#fff!important}
 @keyframes ck-pop{0%{transform:scale(.7)}50%{transform:scale(1.25)}75%{transform:scale(.94)}100%{transform:scale(1)}}
 .ck.popping{animation:ck-pop .22s cubic-bezier(.34,1.56,.64,1) both}
 .se-ty{font-family:'Playfair Display',Georgia,serif;font-size:17px;font-weight:700;line-height:1.1;margin-bottom:4px;letter-spacing:-.01em}
 .se-dt{font-size:13px;color:var(--t2);line-height:1.45;margin-bottom:7px;font-style:italic}
-.se.done .se-dt{color:var(--t3);text-decoration:line-through;text-decoration-color:rgba(124,184,122,.3)}
 .se-ps{display:flex;gap:4px;flex-wrap:wrap}
 .sp{font-size:11px;font-weight:600;padding:2px 8px;border-radius:9px;border:1px solid}
 .sp-fc{color:var(--sp-fc-color)!important;border-color:var(--sp-fc-border)!important}
@@ -503,11 +489,11 @@ body::after{
 /* ── BADGES ── */
 .bg-pad{padding:0 16px 8px}
 .lvc{border-radius:var(--r);padding:20px;text-align:center;margin-bottom:14px;
-  background:linear-gradient(135deg,rgba(124,184,122,.12),rgba(0,0,0,0));
-  border:1px solid rgba(124,184,122,.25);
+  background:linear-gradient(135deg,rgba(90,170,88,.12),rgba(0,0,0,0));
+  border:1px solid rgba(90,170,88,.25);
   backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
-  box-shadow:0 8px 40px rgba(124,184,122,.08),inset 0 1px 0 rgba(255,255,255,.08);position:relative;overflow:hidden}
-.lvc::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% -20%,rgba(124,184,122,.1),transparent 60%);pointer-events:none}
+  box-shadow:0 8px 40px rgba(90,170,88,.08),inset 0 1px 0 rgba(255,255,255,.08);position:relative;overflow:hidden}
+.lvc::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% -20%,rgba(90,170,88,.1),transparent 60%);pointer-events:none}
 .lv-em{font-size:48px;display:block;margin-bottom:6px}
 .lv-nm{font-family:'Barlow Condensed',sans-serif;font-size:32px;font-weight:900;letter-spacing:.04em;line-height:1}
 .lv-sb{font-size:13px;color:var(--t2);margin:3px 0 14px}
@@ -580,11 +566,12 @@ body::after{
 .trend-svg{width:100%;display:block}
 /* Tooltip tendance */
 .trend-tooltip{
-  position:absolute;background:rgba(10,14,8,.95);border:1px solid var(--card-border);
-  border-radius:8px;padding:6px 10px;font-size:11px;color:var(--text);
+  position:absolute;background:rgba(18,18,18,.95);border:1px solid var(--card-border);
+  border-radius:8px;padding:6px 10px;font-size:11px;color:#e8ead4;
   pointer-events:none;opacity:0;transition:opacity .15s;white-space:nowrap;
   font-family:'JetBrains Mono',monospace;z-index:10;
 }
+:root.light .trend-tooltip{background:rgba(252,249,242,.98);color:#141e0f;border-color:rgba(61,122,58,.2);}
 /* Rythme hebdo card */
 .pace-card{border-radius:var(--r);padding:14px;margin-bottom:7px}
 .pace-row{display:flex;justify-content:space-between;align-items:center;
@@ -624,6 +611,13 @@ body::after{
 .view-enter>*:nth-child(7){animation-delay:.17s}
 .view-enter>*:nth-child(8){animation-delay:.19s}
 
+/* ── Courbe d'effort sur carte séance ── */
+.se-curve{
+  width:100%;height:26px;margin-top:8px;overflow:hidden;border-radius:4px;
+  opacity:.8;
+}
+.se.done .se-curve{opacity:.3;filter:grayscale(.4)}
+
 .al-pad{padding:0 16px 8px}
 .alc{border-radius:var(--r);padding:13px;margin-bottom:7px;display:flex;gap:11px}
 .al-s{width:3px;flex-shrink:0;border-radius:2px;align-self:stretch;min-height:48px}
@@ -659,23 +653,26 @@ body::after{
 ══════════════════════════════ */
 #toast{
   position:fixed;
-  /* Use calc with safe-top for correct placement below notch */
   top:max(calc(env(safe-area-inset-top, 47px) + 10px), 30px);
   left:50%;
-  /* Initial state: just off-screen upward, centered */
   transform:translate(-50%, -60px);
   opacity:0;
   background:rgba(18,18,18,.96);
-  border:1px solid rgba(124,184,122,.4);
+  border:1px solid rgba(232,160,48,.5);
   border-radius:26px;padding:9px 18px;
   display:flex;align-items:center;gap:8px;
   font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;
-  color:var(--text);z-index:9500;white-space:nowrap;
-  box-shadow:0 6px 32px rgba(0,0,0,.7),0 0 0 1px rgba(124,184,122,.08);
+  color:#e8ead4;z-index:9500;white-space:nowrap;
+  box-shadow:0 6px 32px rgba(0,0,0,.7),0 0 0 1px rgba(232,160,48,.1);
   backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
   pointer-events:none;
   will-change:transform,opacity;
-  /* No CSS animation class — driven by JS Web Animations API for Safari compat */
+}
+:root.light #toast{
+  background:rgba(252,249,242,.98);
+  border-color:rgba(176,112,24,.4);
+  color:#141e0f;
+  box-shadow:0 6px 32px rgba(0,0,0,.18),0 0 0 1px rgba(176,112,24,.1);
 }
 
 /* ══════════════════════════════
@@ -685,19 +682,24 @@ body::after{
   position:fixed;
   bottom:calc(var(--tab) + env(safe-area-inset-bottom, 34px) + 12px);
   left:16px;right:16px;
-  /* Initial state off-screen downward */
   transform:translateY(20px);
   opacity:0;
-  background:rgba(12,12,12,.96);
+  background:rgba(18,18,18,.96);
   border:1px solid var(--card-border);
   border-radius:18px;
   padding:12px 16px;
   font-family:'Barlow',sans-serif;font-size:14px;
-  color:var(--text);text-align:center;line-height:1.5;
+  color:#e8ead4;text-align:center;line-height:1.5;
   z-index:9200;pointer-events:none;
   box-shadow:0 -4px 32px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.07);
   backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
   will-change:transform,opacity;
+}
+:root.light #humor{
+  background:rgba(252,249,242,.98);
+  color:#141e0f;
+  border-color:rgba(61,122,58,.2);
+  box-shadow:0 -4px 24px rgba(0,0,0,.12),inset 0 1px 0 rgba(255,255,255,.8);
 }
 
 /* ══════════════════════════════
@@ -708,23 +710,32 @@ body::after{
   top:50%;left:50%;
   transform:translate(-50%,-50%) scale(.85);
   opacity:0;
-  background:rgba(14,14,14,.97);
-  border:1px solid rgba(124,184,122,.25);
+  background:rgba(18,18,18,.97);
+  border:1px solid rgba(232,160,48,.3);
   border-radius:22px;
   padding:28px 24px;
   text-align:center;
   width:calc(100vw - 64px);
   max-width:320px;
   z-index:9600;pointer-events:none;
-  box-shadow:0 20px 80px rgba(0,0,0,.8),0 0 60px rgba(124,184,122,.1);
+  box-shadow:0 20px 80px rgba(0,0,0,.8),0 0 60px rgba(232,160,48,.12);
   backdrop-filter:blur(32px);-webkit-backdrop-filter:blur(32px);
   will-change:transform,opacity;
 }
+:root.light #badge-popup{
+  background:rgba(252,249,242,.99);
+  border-color:rgba(176,112,24,.3);
+  box-shadow:0 20px 80px rgba(0,0,0,.18),0 0 40px rgba(176,112,24,.1);
+}
 .bp-ico{font-size:56px;display:block;margin-bottom:10px}
 .bp-title{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;
-  color:var(--a1);text-transform:uppercase;letter-spacing:.12em;margin-bottom:4px}
-.bp-name{font-family:'Barlow Condensed',sans-serif;font-size:30px;font-weight:900;line-height:1;margin-bottom:6px}
-.bp-desc{font-size:13px;color:var(--t2);line-height:1.4}
+  color:#e8a030;text-transform:uppercase;letter-spacing:.12em;margin-bottom:4px}
+:root.light .bp-title{color:#8f631d}
+.bp-name{font-family:'Barlow Condensed',sans-serif;font-size:30px;font-weight:900;
+  line-height:1;margin-bottom:6px;color:#e8ead4}
+:root.light .bp-name{color:#141e0f}
+.bp-desc{font-size:13px;color:#a8bea6;line-height:1.4}
+:root.light .bp-desc{color:#2e4a2a}
 /* backdrop */
 #badge-bg{position:fixed;inset:0;background:rgba(0,0,0,0);z-index:9500;display:none;pointer-events:none}
 #badge-bg.on{display:block}
@@ -746,9 +757,9 @@ body::after{
 
 /* ══ Haptic pulse ring on checkbox ══ */
 @keyframes haptic-ring{
-  0%  {box-shadow:0 0 0 0 rgba(124,184,122,.55)}
-  60% {box-shadow:0 0 0 10px rgba(124,184,122,0)}
-  100%{box-shadow:0 0 0 0   rgba(124,184,122,0)}
+  0%  {box-shadow:0 0 0 0 rgba(90,170,88,.55)}
+  60% {box-shadow:0 0 0 10px rgba(90,170,88,0)}
+  100%{box-shadow:0 0 0 0   rgba(90,170,88,0)}
 }
 .ck.haptic{animation:haptic-ring .38s ease-out}
 
@@ -788,7 +799,7 @@ body::after{
 .cal-cell.rest{background:var(--card);border:1px solid var(--card-border);opacity:.35}
 .cal-cell.sess{background:var(--card);border:1px solid var(--card-border)}
 .cal-cell.sess.dn{border-color:transparent}
-.cal-cell.today{box-shadow:0 0 0 2px var(--a1),0 4px 12px rgba(124,184,122,.18)}
+.cal-cell.today{box-shadow:0 0 0 2px var(--a1),0 4px 12px var(--a1bg)}
 @keyframes rcp{0%,100%{box-shadow:0 0 0 2px var(--a2),0 0 0 0 rgba(184,117,107,.2)}50%{box-shadow:0 0 0 2px var(--a2),0 0 8px 3px rgba(184,117,107,.08)}}
 .cal-cell.race-day{animation:rcp 2.5s ease-in-out infinite}
 .cal-dot{width:7px;height:7px;border-radius:50%;margin-bottom:1px;flex-shrink:0}
@@ -805,7 +816,7 @@ body::after{
 .cal-det-desc{font-size:13px;color:var(--t2);line-height:1.45;margin-bottom:8px}
 .cal-det-pills{display:flex;gap:6px;flex-wrap:wrap}
 .cdp{font-size:11px;font-weight:600;padding:3px 9px;border-radius:10px;border:1px solid var(--card-border);background:var(--card);color:var(--t2)}
-.cdp.hot{background:var(--a1bg);border-color:rgba(124,184,122,.3);color:var(--a1)}
+.cdp.hot{background:var(--a1bg);border-color:rgba(90,170,88,.3);color:var(--a1)}
 .cal-rest-wrap{margin:10px 12px 0;border-radius:var(--r);padding:12px 14px;background:var(--card);border:1px solid var(--card-border);display:flex;align-items:center;gap:10px}
 .cal-rest-ico{font-size:20px;flex-shrink:0}
 .cal-rest-txt{font-size:13px;color:var(--t2);line-height:1.4}
@@ -827,7 +838,7 @@ body::after{
   cursor:pointer;transition:all .2s;
   backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
 }
-.ptb.active{background:var(--a1);border-color:var(--a1);color:var(--bg);font-weight:700;box-shadow:0 4px 16px rgba(124,184,122,.25)}
+.ptb.active{background:var(--a1);border-color:var(--a1);color:var(--bg);font-weight:700;box-shadow:0 4px 16px rgba(90,170,88,.25)}
 .ptb svg{opacity:.8}
 
 /* ════ WEEK AT A GLANCE ════ */
@@ -845,8 +856,8 @@ body::after{
 }
 .wkg-day:active{transform:scale(.94)}
 .wkg-day.rest{opacity:.35;cursor:default;pointer-events:none}
-.wkg-day.done{background:rgba(48,209,88,.07);border-color:rgba(48,209,88,.25)}
-.wkg-day.today{box-shadow:0 0 0 1.5px var(--a1),0 4px 10px rgba(124,184,122,.18)}
+.wkg-day.done{background:rgba(90,170,88,.1);border-color:rgba(90,170,88,.3)}
+.wkg-day.today{box-shadow:0 0 0 1.5px var(--a1),0 4px 10px var(--a1bg)}
 .wkg-day-lbl{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:.06em}
 .wkg-day.today .wkg-day-lbl{color:var(--a1);font-weight:700}
 .wkg-day-ico{font-size:18px;line-height:1}
@@ -869,7 +880,6 @@ body::after{
 </style>
 </head>
 <body>
-<!-- SVG topo animé — fond génératif, fixed, sous tout -->
 <!-- Canvas bruit de Perlin animé — fond génératif -->
 <canvas id="noise-canvas" aria-hidden="true"></canvas>
 
@@ -899,16 +909,19 @@ body::after{
   <!-- HOME -->
   <div class="view active" id="view-home">
     <div class="hero">
-      <div class="hero-sup">🏁 Objectif course</div>
-      <div class="hero-bd">
-        <div><div class="hero-t">20km<br>de Tours</div><div class="hero-d">Dim. 27 sept. 2026 · Quai Paul Bert</div></div>
-        <div><div class="cd-n" id="cdN">—</div><div class="cd-u">JOURS</div></div>
-      </div>
-      <div class="hero-rw">
-        <div class="hs"><div class="hs-v">4'15</div><div class="hs-l">allure/km</div></div>
-        <div class="hs"><div class="hs-v">1h25'</div><div class="hs-l">objectif</div></div>
-        <div class="hs"><div class="hs-v">20km</div><div class="hs-l">distance</div></div>
-        <div class="hs"><div class="hs-v">61m</div><div class="hs-l">D+</div></div>
+      <canvas id="hero-sky" aria-hidden="true"></canvas>
+      <div class="hero-content">
+        <div class="hero-sup">🏁 Objectif course</div>
+        <div class="hero-bd">
+          <div><div class="hero-t">20km<br>de Tours</div><div class="hero-d">Dim. 27 sept. 2026 · Quai Paul Bert</div></div>
+          <div><div class="cd-n" id="cdN">—</div><div class="cd-u">JOURS</div></div>
+        </div>
+        <div class="hero-rw">
+          <div class="hs"><div class="hs-v">4'15</div><div class="hs-l">allure/km</div></div>
+          <div class="hs"><div class="hs-v">1h25'</div><div class="hs-l">objectif</div></div>
+          <div class="hs"><div class="hs-v">20km</div><div class="hs-l">distance</div></div>
+          <div class="hs"><div class="hs-v">61m</div><div class="hs-l">D+</div></div>
+        </div>
       </div>
     </div>
 
@@ -1071,13 +1084,15 @@ const WEEKS=[
 ];
 const TOTAL=WEEKS.reduce((a,w)=>a+Object.keys(w.s).length,0);
 const LEVELS=[
-  {min:0,   ti:'Débutant',  ic:'🏃',co:'#6e8c6a'},
-  {min:200, ti:'Régulier',   ic:'⚡',co:'#e8a030'},
-  {min:500, ti:'Endurant',   ic:'🔥',co:'#e05a5a'},
-  {min:1000,ti:'Performeur', ic:'💪',co:'#4a8fd4'},
-  {min:2000,ti:'Compétiteur',ic:'🎯',co:'#a060c8'},
-  {min:3000,ti:'Élite',      ic:'🏆',co:'#d4a030'},
+  {min:0,   ti:'Débutant',  ic:'🏃',co:'#6e8c6a',cl:'#4a6040'},
+  {min:200, ti:'Régulier',  ic:'⚡',co:'#e8a030',cl:'#8f631d'},
+  {min:500, ti:'Endurant',  ic:'🔥',co:'#e05a5a',cl:'#b74949'},
+  {min:1000,ti:'Performeur',ic:'💪',co:'#4a8fd4',cl:'#396fa5'},
+  {min:2000,ti:'Compétiteur',ic:'🎯',co:'#a060c8',cl:'#8c54af'},
+  {min:3000,ti:'Élite',     ic:'🏆',co:'#d4a030',cl:'#87661e'},
 ];
+// Retourne la couleur de niveau adaptée au mode courant
+const acLv=lv=>document.documentElement.classList.contains('light')?lv.cl:lv.co;
 const BADGES=[
   {id:'b1', ic:'👟',nm:'Premier Pas',    de:'1ère séance validée',        ok:n=>n>=1},
   {id:'b2', ic:'📅',nm:'Semaine 1',       de:'Semaine 1 complète',         ok:(n,d)=>wFull(1,d)},
@@ -1188,9 +1203,86 @@ const HUMOR=[
   "EF calme. T'as regardé le ciel, les arbres, un chien. C'est ça aussi le running.",
 ];
 
-/* ══════════════════════════════════════════
-   HELPERS
-══════════════════════════════════════════ */
+// Profils d'effort normalisés [0–1] pour chaque type de séance
+// Chaque tableau = ~20 points représentant l'intensité au fil du temps
+const EFFORT_PROFILES={
+  // EF : mise en route 3', plateau constant ~40% FCM, fin légèrement montante (progressif)
+  EF:           [.28,.32,.36,.38,.39,.4,.4,.4,.4,.4,.4,.4,.41,.41,.41,.41,.42,.42,.38,.3],
+
+  // FractionCourt 30s/30s : EF 15' → créneaux VMAX (30s) / récup active (30s) → EF 10'
+  // Les créneaux doivent être bien distincts : effort .95, récup active .3
+  FractionCourt:[.35,.37,.38,.38,.38,.95,.28,.95,.28,.93,.28,.92,.28,.91,.28,.9,.28,.38,.36,.34],
+
+  // FractionLong 2-5min : EF 15' → blocs longs à 90%VMA (4-5pts) / récup 2min (2pts) → EF 10'
+  FractionLong: [.35,.37,.38,.38,.87,.87,.87,.87,.27,.27,.88,.88,.88,.88,.27,.27,.87,.87,.38,.35],
+
+  // Seuil : EF 15' → montée progressive → plateau seuil ~85%FCM stable → retour EF
+  Seuil:        [.35,.37,.38,.38,.5,.65,.78,.82,.83,.83,.83,.83,.83,.82,.82,.5,.42,.38,.36,.34],
+
+  // Côte : EF → répétitions côte (montée brutale) / descente récup (trot bas) → EF
+  Cote:         [.35,.37,.38,.38,.95,.22,.93,.22,.91,.22,.90,.22,.88,.22,.86,.22,.38,.37,.36,.34],
+
+  // AS21 : EF 15' → allure spécifique 4'10-4'15 (~78%FCM) stable → retour EF 10'
+  AS21:         [.35,.37,.38,.38,.52,.72,.78,.79,.80,.80,.80,.80,.80,.80,.79,.55,.42,.38,.36,.34],
+
+  // Sortie longue : EF progressif — démarre doux, monte très lentement, fin légèrement + soutenu
+  SortieLongue: [.28,.32,.36,.38,.39,.4,.41,.41,.42,.42,.43,.43,.44,.44,.45,.46,.46,.44,.38,.3],
+
+  // Déblocage : très léger, quasi-plat, 3-4 accélérations douces de 100m en fin
+  Deblocage:    [.28,.3,.32,.32,.33,.33,.33,.33,.33,.33,.33,.33,.33,.34,.5,.3,.55,.3,.52,.28],
+
+  // Course 20km : départ contrôlé, plateau race pace stable, légère accélération finale
+  Course:       [.55,.65,.72,.75,.76,.76,.77,.77,.77,.78,.78,.78,.79,.79,.8,.8,.82,.85,.9,.95],
+};
+
+// Génère un SVG de courbe d'effort inline
+function buildEffortSVG(type,color){
+  const pts=EFFORT_PROFILES[type]||EFFORT_PROFILES.EF;
+  const W=300,H=26,pad=2;
+  const iW=W-pad*2,iH=H-pad*2;
+  const xs=pts.map((_,i)=>pad+i/(pts.length-1)*iW);
+  const ys=pts.map(v=>pad+iH*(1-v));
+
+  // Ligne de courbe
+  const linePts=pts.map((_,i)=>`${xs[i].toFixed(1)},${ys[i].toFixed(1)}`).join(' ');
+  const polyline=`<polyline points="${linePts}" fill="none" stroke="${color}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" opacity=".9"/>`;
+
+  // Zone remplie sous la courbe
+  const areaFirst=`${xs[0].toFixed(1)},${(H-pad).toFixed(1)}`;
+  const areaLast=`${xs[pts.length-1].toFixed(1)},${(H-pad).toFixed(1)}`;
+  const areaPts=`${areaFirst} ${linePts} ${areaLast}`;
+  const area=`<polygon points="${areaPts}" fill="${color}" opacity=".15"/>`;
+
+  // Points d'intensité max
+  const maxV=Math.max(...pts);
+  const peaks=pts.reduce((acc,v,i)=>{
+    if(v>=maxV*.9&&(acc.length===0||i-acc[acc.length-1]>2))acc.push(i);
+    return acc;
+  },[]);
+  const peakDots=peaks.map(i=>`<circle cx="${xs[i].toFixed(1)}" cy="${ys[i].toFixed(1)}" r="2.5" fill="${color}" opacity=".9"/>`).join('');
+
+  // Ligne de base EF
+  const baseY=(pad+iH*(1-.38)).toFixed(1);
+  const baseLine=`<line x1="${pad}" y1="${baseY}" x2="${W-pad}" y2="${baseY}" stroke="${color}" stroke-width=".5" stroke-dasharray="3,3" opacity=".25"/>`;
+
+  return`<svg class="se-curve" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-hidden="true">
+    ${area}${baseLine}${polyline}${peakDots}
+  </svg>`;
+}
+// Couleurs light mode — toutes testées ≥4.5:1 sur fond crème #f5f0e8
+const LIGHT_COLORS={
+  '#5aaa58':'#407a3f', // EF vert
+  '#e05a5a':'#b74949', // Fractionné court rouge
+  '#e8843a':'#a25c28', // Fractionné long orange
+  '#e8a030':'#8f631d', // Seuil ambre
+  '#a060c8':'#8c54af', // Côte violet
+  '#4a8fd4':'#396fa5', // AS21 bleu
+  '#7a6abf':'#7061af', // Sortie longue violet doux
+  '#38b0b0':'#267777', // Déblocage cyan
+  '#d4a030':'#87661e', // Course or
+};
+// Retourne la couleur accessible selon le mode courant
+const ac=c=>document.documentElement.classList.contains('light')?(LIGHT_COLORS[c]||c):c;
 const gPh=w=>Object.entries(PHASES).find(([,p])=>p.w.includes(w.n))[0];
 const wFull=(n,d)=>{const w=WEEKS.find(x=>x.n===n);return w&&Object.keys(w.s).every(dy=>d[`${n}-${dy}`])};
 const cT=(d,t)=>WEEKS.reduce((a,w)=>a+Object.entries(w.s).filter(([dy,s])=>s.t===t&&d[`${w.n}-${dy}`]).length,0);
@@ -1225,7 +1317,7 @@ const saveSelW=()=>{try{localStorage.setItem('t20_selW',String(selW))}catch(e){}
    PARTICLE ENGINE — canvas-based, physics
 ══════════════════════════════════════════ */
 let particles=[], raf=null;
-const PCOLS=['#7cb87a','#c8956c','#a8c5a0','#d4e8b0','#6b9ab8','#9b8fb8','#d4c47a','#e8ead4'];
+const PCOLS=['#5aaa58','#e8843a','#a8c5a0','#d4f0b0','#4a8fd4','#a060c8','#e8a030','#e8ead4'];
 
 // Lazy canvas init — only when first burst() is called (avoids crash at parse time)
 let canvas=null,ctx=null,canvasReady=false;
@@ -1283,7 +1375,7 @@ class Particle{
 
 class Spark{
   constructor(x,y,col){
-    this.x=x;this.y=y;this.col=col||'#7cb87a';
+    this.x=x;this.y=y;this.col=col||'#5aaa58';
     const angle=Math.random()*Math.PI*2;
     const speed=5+Math.random()*10;
     this.vx=Math.cos(angle)*speed;this.vy=Math.sin(angle)*speed-6;
@@ -1320,7 +1412,7 @@ class Spark{
 
 class Ring{
   constructor(x,y,col,delay=0){
-    this.x=x;this.y=y;this.col=col||'#7cb87a';
+    this.x=x;this.y=y;this.col=col||'#5aaa58';
     this.r=0;this.maxR=Math.max(window.innerWidth||390,window.innerHeight||844)*.6;
     this.life=1;this.decay=0.028;this.frames=delay;this.started=false;this.flash=1;
   }
@@ -1363,7 +1455,7 @@ function burst(cx,cy,mega=false){
   if(!ensureCanvas())return;
   canvas.classList.add('on');
   cancelAnimationFrame(raf);
-  const colors=['#7cb87a','#c8956c','#6b9ab8','#d4e8b0'];
+  const colors=['#5aaa58','#e8843a','#4a8fd4','#d4f0b0'];
   // staggered glow rings (frame-delay based, no setTimeout jitter)
   const nR=mega?4:2;
   for(let i=0;i<nR;i++) effects.push(new Ring(cx,cy,colors[i%colors.length],i*7));
@@ -1519,7 +1611,7 @@ function renderHdr(){
   const xp=xpTot(done),lv=getLv(xp),nxt=LEVELS[Math.min(lv.idx+1,LEVELS.length-1)];
   const pct=lv.idx===LEVELS.length-1?100:Math.round(((xp-lv.min)/(nxt.min-lv.min))*100);
   const pill=document.getElementById('hdrLv');
-  pill.textContent=`${lv.ic} LVL ${lv.idx+1}`;pill.style.background=lv.co;
+  pill.textContent=`${lv.ic} LVL ${lv.idx+1}`;pill.style.background=acLv(lv);
   document.getElementById('xpBar').style.width=`${pct}%`;
   document.getElementById('xpNm').textContent=`${xp}/${nxt.min} XP`;
   const sk=mxS(done);
@@ -1620,7 +1712,7 @@ function renderWkGlance(){
         ${dayLabel[dy]}
       </div>
       <div class="wkg-day-ico">${SESS_EMO[s.t]||'🏃'}</div>
-      <div class="wkg-day-type" style="color:${isDone?'var(--a1)':a.c}">
+      <div class="wkg-day-type" style="color:${isDone?'var(--a1)':ac(a.c)}">
         ${SESS_SHORT[s.t]||s.t}
       </div>
       <div class="wkg-ck">✓</div>
@@ -1633,8 +1725,8 @@ function renderWkGlance(){
   el.style.borderColor=p.bo||p.c+'44';
   el.innerHTML=`
     <div class="wkg-header">
-      <div class="wkg-title" style="color:${p.c}">Semaine ${w.n}</div>
-      <div class="wkg-phase" style="color:${p.c};border-color:${p.c+'44'};background:${p.bg}">${p.l}</div>
+      <div class="wkg-title" style="color:${ac(p.c)}">Semaine ${w.n}</div>
+      <div class="wkg-phase" style="color:${ac(p.c)};border-color:${p.c+'44'};background:${p.bg}">${p.l}</div>
     </div>
     <div class="wkg-days">${daysHtml}</div>
     <div class="wkg-footer">
@@ -1645,7 +1737,7 @@ function renderWkGlance(){
         </div>
       </div>
       <div class="wkg-km">
-        <div class="wkg-km-n" style="color:${p.c}">${kmDoneWk}</div>
+        <div class="wkg-km-n" style="color:${ac(p.c)}">${kmDoneWk}</div>
         <div class="wkg-km-l">km courus</div>
       </div>
     </div>`;
@@ -1713,7 +1805,7 @@ function renderNextCard(){
     ?`<div class="nc g live" style="padding-left:18px">
         <div class="nc-ac" style="background:${a.c}"></div>
         <div class="nc-ey">S${nw.n} · ${DAY[nd]}</div>
-        <div class="nc-ty" style="color:${a.c}">${a.l}</div>
+        <div class="nc-ty" style="color:${ac(a.c)}">${a.l}</div>
         <div class="nc-dt">${ns.d}</div>
         <div class="nc-ps">
           <span class="np h">${a.p}</span><span class="np">${a.f}</span>
@@ -1803,13 +1895,13 @@ function renderPlan(fromChip=false){
   document.getElementById('planBody').innerHTML=`
     <div class="wh" style="background:${p.bg};border-color:${p.bo}">
       <div class="wh-t">
-        <div><div class="wh-n" style="color:${p.c}">Semaine ${w.n}</div><div class="wh-d">${w.dt}</div></div>
-        <div class="wh-km"><div class="wh-kn" style="color:${p.c}">${w.km}</div><div class="wh-kl">km/sem.</div></div>
+        <div><div class="wh-n" style="color:${ac(p.c)}">Semaine ${w.n}</div><div class="wh-d">${w.dt}</div></div>
+        <div class="wh-km"><div class="wh-kn" style="color:${ac(p.c)}">${w.km}</div><div class="wh-kl">km/sem.</div></div>
       </div>
       <div class="wh-b">
         ${miniRing}
         <div class="wh-p">
-          <div class="wh-pr"><span class="wh-pl">${wDn}/${wk.length} séances</span><span class="wh-pv" style="color:${p.c}">${wxp}/${mxp} XP</span></div>
+          <div class="wh-pr"><span class="wh-pl">${wDn}/${wk.length} séances</span><span class="wh-pv" style="color:${ac(p.c)}">${wxp}/${mxp} XP</span></div>
           <div class="wh-br"><div class="wh-bf" style="width:${wpct}%;background:${p.c}"></div></div>
         </div>
       </div>
@@ -1831,12 +1923,13 @@ function renderPlan(fromChip=false){
               aria-label="${dn?'Décocher':'Valider'} : ${a.l} ${DAY[dy]}" aria-pressed="${dn}">✓</button>
           </div>
         </div>
-        <div class="se-ty" style="color:${dn?'var(--green)':a.c}">${dn?'✓ ':''}${a.l}</div>
+        <div class="se-ty" style="color:${dn?'var(--green)':ac(a.c)}">${dn?'✓ ':''}${a.l}</div>
         <div class="se-dt">${s.d}</div>
         <div class="se-ps">
-          <span class="sp" style="color:${dn?'var(--green)':a.c};border-color:${dn?'var(--green)':a.c}">${a.p}</span>
+          <span class="sp" style="color:${dn?'var(--green)':ac(a.c)};border-color:${dn?'var(--green)':ac(a.c)}">${a.p}</span>
           <span class="sp sp-fc">${a.f}</span>
         </div>
+        ${buildEffortSVG(s.t,dn?'var(--green)':a.c)}
       </div>`;
     }).join('')}`;
   // restore scroll — seulement si appel interne (chip/swipe/checkbox), pas depuis switchV
@@ -1915,9 +2008,9 @@ function updateSessCard(key){
   const s=w.s[dy];const a=AL[s.t];const dn=!!done[key];const isr=s.t==='Course';
   card.classList.toggle('done',dn);
   const ty=card.querySelector('.se-ty');
-  if(ty){ty.textContent=(dn?'✓ ':'')+a.l;ty.style.color=dn?'var(--green)':a.c;}
+  if(ty){ty.textContent=(dn?'✓ ':'')+a.l;ty.style.color=dn?'var(--green)':ac(a.c);}
   const pp=card.querySelector('.sp:first-child');
-  if(pp){pp.style.color=dn?'var(--green)':a.c;pp.style.borderColor=dn?'var(--green)':a.c;}
+  if(pp){pp.style.color=dn?'var(--green)':ac(a.c);pp.style.borderColor=dn?'var(--green)':ac(a.c);}
   btn.classList.toggle('on',dn);
   btn.setAttribute('aria-pressed',dn);
   btn.setAttribute('aria-label',`${dn?'Décocher':'Valider'} : ${a.l}`);
@@ -1976,8 +2069,8 @@ function buildTrendSVG(){
         style="height:${H}px;overflow:visible">
       <defs>
         <linearGradient id="doneGrad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="#7cb87a" stop-opacity=".25"/>
-          <stop offset="100%" stop-color="#7cb87a" stop-opacity="0"/>
+          <stop offset="0%" stop-color="#5aaa58" stop-opacity=".25"/>
+          <stop offset="100%" stop-color="#5aaa58" stop-opacity="0"/>
         </linearGradient>
       </defs>
       ${yLabels}
@@ -2030,7 +2123,7 @@ function renderStats(){
       <div class="trend-hdr">
         <div class="trend-title">Évolution km</div>
         <div class="trend-legend">
-          <div class="trend-leg"><div class="trend-leg-dot" style="background:#7cb87a"></div>Réalisé</div>
+          <div class="trend-leg"><div class="trend-leg-dot" style="background:#5aaa58"></div>Réalisé</div>
           <div class="trend-leg"><div class="trend-leg-dot" style="background:rgba(124,184,122,.3)"></div>Programmé</div>
         </div>
       </div>
@@ -2075,7 +2168,7 @@ function renderStats(){
       <div class="vba-wrap" style="height:${pct}%;width:100%;position:relative;border-radius:3px 3px 0 0;overflow:hidden;background:${p.c+'28'}">
         <div class="vba" style="position:absolute;bottom:0;left:0;right:0;height:${dnPct}%;background:${p.c};border-radius:3px 3px 0 0;min-height:${dnKm>0?2:0}px;transition:height .4s cubic-bezier(.4,0,.2,1)"></div>
       </div>
-      <span class="vl" style="color:${act?p.c:'var(--t3)'};font-weight:${act?700:400}">${act?'▸':''} S${w.n}</span>
+      <span class="vl" style="color:${act?ac(p.c):'var(--t3)'};font-weight:${act?700:400}">${act?'▸':''} S${w.n}</span>
     </div>`;
   }).join('');
   document.getElementById('volBars').querySelectorAll('.vc').forEach(el=>el.addEventListener('click',()=>{
@@ -2094,13 +2187,13 @@ function renderStats(){
       const p=PHASES[gPh(w)];
       const isNow=currentW===w.n;
       return`<div class="pace-row" style="${isNow?'opacity:1':'opacity:.7'}">
-        <div class="pace-wk" style="color:${isNow?p.c:'var(--t3)'}">${isNow?'▶':''}S${w.n}</div>
+        <div class="pace-wk" style="color:${isNow?ac(p.c):'var(--t3)'}">${isNow?'▶':''}S${w.n}</div>
         <div class="pace-bar-wrap">
           <div class="pace-bar-plan" style="width:${planPct}%;background:${p.c}"></div>
           <div class="pace-bar-prog" style="width:${pct}%;background:${p.c}"></div>
         </div>
         <div>
-          <div class="pace-km" style="color:${dnKm>0?p.c:'var(--t3)'}">${dnKm>0?dnKm:'-'}<span style="font-size:9px;color:var(--t3);font-family:'JetBrains Mono',monospace;font-weight:400">/${w.km}</span></div>
+          <div class="pace-km" style="color:${dnKm>0?ac(p.c):'var(--t3)'}">${dnKm>0?dnKm:'-'}<span style="font-size:9px;color:var(--t3);font-family:'JetBrains Mono',monospace;font-weight:400">/${w.km}</span></div>
         </div>
       </div>`;
     }).join('');
@@ -2113,8 +2206,8 @@ function renderStats(){
     const dn=pw.reduce((a,w)=>a+Object.keys(w.s).filter(dy=>done[`${w.n}-${dy}`]).length,0);
     const pct=tot?Math.round((dn/tot)*100):0;
     const pxp=pw.reduce((a,w)=>a+Object.entries(w.s).reduce((b,[dy,s])=>done[`${w.n}-${dy}`]?b+(AL[s.t]?.x||50):b,0),0);
-    return`<div class="pr g"><div class="pr-h"><div class="pr-n" style="color:${p.c}">${p.l}</div>
-      <div style="text-align:right"><div class="pr-p" style="color:${p.c}">${pct}%</div>
+    return`<div class="pr g"><div class="pr-h"><div class="pr-n" style="color:${ac(p.c)}">${p.l}</div>
+      <div style="text-align:right"><div class="pr-p" style="color:${ac(p.c)}">${pct}%</div>
       <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--t3)">${pxp} XP</div></div></div>
       <div class="pr-b"><div class="pr-f" style="width:${pct}%;background:${p.c}"></div></div></div>`;
   }).join('');
@@ -2130,7 +2223,7 @@ function renderBadges(){
   const ul=ulk(done),ulIds=new Set(ul.map(b=>b.id));
   document.getElementById('lvCard').innerHTML=`<div class="lvc">
     <span class="lv-em">${lv.ic}</span>
-    <div class="lv-nm" style="color:${lv.co}">${lv.ti}</div>
+    <div class="lv-nm" style="color:${acLv(lv)}">${lv.ti}</div>
     <div class="lv-sb">Niveau ${lv.idx+1} · ${xp} XP · ${ul.length}/${BADGES.length} badges</div>
     <div class="lv-xr"><span class="lv-xl">${xp} XP</span>
     <span class="lv-xl">${lv.idx<LEVELS.length-1?nxt.min+' XP → Nv.'+(lv.idx+2):'NIVEAU MAX !'}</span></div>
@@ -2157,8 +2250,8 @@ function renderAllures(){
   document.getElementById('alCards').innerHTML=Object.entries(AL).map(([k,a])=>{
     const bars=Array.from({length:5},(_,i)=>`<div class="al-b" style="height:${(i+1)*4}px;background:${i<a.e?a.c:'var(--progress-track)'}"></div>`).join('');
     return`<div class="alc g"><div class="al-s" style="background:${a.c}"></div>
-      <div style="flex:1"><div class="al-k" style="color:${a.c}">${k}</div>
-        <div class="al-p" style="color:${a.c}">${a.p}</div><div class="al-f">${a.f}</div>
+      <div style="flex:1"><div class="al-k" style="color:${ac(a.c)}">${k}</div>
+        <div class="al-p" style="color:${ac(a.c)}">${a.p}</div><div class="al-f">${a.f}</div>
         <div class="al-d">${a.d}</div></div>
       <div class="al-ef">${bars}</div></div>`;
   }).join('');
@@ -2432,6 +2525,188 @@ document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>swit
 })();
 
 /* ══════════════════════════════════════════
+   HERO SKY — cycle jour/nuit canvas
+══════════════════════════════════════════ */
+(function initHeroSky(){
+  const cv=document.getElementById('hero-sky');
+  if(!cv)return;
+  const ctx=cv.getContext('2d');
+
+  // Étoiles — générées aléatoirement une seule fois
+  const STARS=Array.from({length:55},()=>({
+    x:Math.random(),
+    y:Math.random()*.65,       // dans le tiers supérieur du ciel
+    r:.4+Math.random()*.8,
+    flicker:Math.random()*Math.PI*2,  // phase aléatoire
+    speed:.4+Math.random()*1.2,
+  }));
+
+  // Palette de ciel selon l'heure (0–24)
+  // Chaque entrée : [heure, [r,g,b haut], [r,g,b bas]]
+  const SKY_PALETTE=[
+    [ 0, [8,12,28],    [12,18,40]   ],  // minuit — bleu nuit
+    [ 4, [6,10,22],    [10,14,32]   ],  // 4h — nuit profonde
+    [ 5, [28,18,45],   [60,32,50]   ],  // 5h — aube violette
+    [ 6, [90,50,30],   [180,80,40]  ],  // 6h — lever soleil orange
+    [ 7, [180,100,50], [220,150,80] ],  // 7h — matin doré
+    [ 9, [80,140,200], [140,195,240]],  // 9h — matin bleu clair
+    [12, [60,130,210], [120,185,240]],  // midi — bleu vif
+    [17, [80,140,200], [140,195,240]],  // 17h — après-midi
+    [19, [200,110,50], [240,160,80] ],  // 19h — coucher orange
+    [20, [160,70,40],  [200,100,60] ],  // 20h — crépuscule
+    [21, [50,30,60],   [80,40,70]   ],  // 21h — soir violet
+    [22, [14,18,38],   [18,24,50]   ],  // 22h — nuit tombée
+    [24, [8,12,28],    [12,18,40]   ],  // retour minuit
+  ];
+
+  function lerpC(a,b,t){
+    return[a[0]+(b[0]-a[0])*t, a[1]+(b[1]-a[1])*t, a[2]+(b[2]-a[2])*t];
+  }
+  function toRgb(c,alpha=1){
+    return`rgba(${c[0]|0},${c[1]|0},${c[2]|0},${alpha})`;
+  }
+
+  // Retourne les couleurs interpolées pour une heure h (0–24)
+  function skyColors(h){
+    for(let i=0;i<SKY_PALETTE.length-1;i++){
+      const[h0,top0,bot0]=SKY_PALETTE[i];
+      const[h1,top1,bot1]=SKY_PALETTE[i+1];
+      if(h>=h0&&h<h1){
+        const t=(h-h0)/(h1-h0);
+        return{top:lerpC(top0,top1,t),bot:lerpC(bot0,bot1,t)};
+      }
+    }
+    return{top:SKY_PALETTE[0][1],bot:SKY_PALETTE[0][2]};
+  }
+
+  // Position du soleil/lune selon l'heure — arc parabolique
+  function celestialPos(h,W,H){
+    // Soleil : visible 6h–20h, arc de gauche à droite
+    const sunrise=6,sunset=20;
+    if(h>=sunrise&&h<=sunset){
+      const t=(h-sunrise)/(sunset-sunrise);
+      const x=W*t;
+      const y=H*.55*(1-4*(t-.5)*(t-.5)); // parabole inversée
+      const isSun=true;
+      return{x,y:H*.15+H*.45*(1-y/(H*.55)),isSun};
+    }
+    // Lune : visible 21h–5h
+    const moonStart=21,moonEnd=29; // 29 = 5h du matin suivant
+    const hAdj=h<6?h+24:h;
+    if(hAdj>=moonStart&&hAdj<=moonEnd){
+      const t=(hAdj-moonStart)/(moonEnd-moonStart);
+      const x=W*t;
+      const y=H*.5*(1-4*(t-.5)*(t-.5));
+      return{x,y:H*.12+H*.4*(1-y/(H*.5)),isSun:false};
+    }
+    return null;
+  }
+
+  // Luminosité des étoiles selon l'heure
+  function starAlpha(h){
+    if(h>=7&&h<=18)return 0;
+    if(h>6&&h<7)return 1-(h-6);
+    if(h>18&&h<19)return h-18;
+    return 1;
+  }
+
+  let skyRaf=null;
+  let lastSkyFrame=0;
+  const SKY_FPS=30;
+  const SKY_MS=1000/SKY_FPS;
+  let t_star=0; // temps pour le scintillement
+
+  function resize(){
+    const hero=cv.parentElement;
+    cv.width=hero.offsetWidth||358;
+    cv.height=hero.offsetHeight||230;
+  }
+
+  function drawSky(ts){
+    skyRaf=requestAnimationFrame(drawSky);
+    if(ts-lastSkyFrame<SKY_MS)return;
+    lastSkyFrame=ts;
+    t_star+=.016;
+
+    const W=cv.width,H=cv.height;
+    const now=new Date();
+    const h=now.getHours()+now.getMinutes()/60+now.getSeconds()/3600;
+    const{top,bot}=skyColors(h);
+
+    // Dégradé ciel
+    const grad=ctx.createLinearGradient(0,0,0,H);
+    grad.addColorStop(0,toRgb(top));
+    grad.addColorStop(1,toRgb(bot));
+    ctx.fillStyle=grad;
+    ctx.fillRect(0,0,W,H);
+
+    // Étoiles
+    const sAlpha=starAlpha(h);
+    if(sAlpha>0){
+      STARS.forEach(s=>{
+        const flicker=.7+.3*Math.sin(t_star*s.speed+s.flicker);
+        ctx.beginPath();
+        ctx.arc(s.x*W,s.y*H,s.r,0,Math.PI*2);
+        ctx.fillStyle=`rgba(255,252,240,${sAlpha*flicker*.9})`;
+        ctx.fill();
+      });
+    }
+
+    // Soleil ou lune
+    const cel=celestialPos(h,W,H);
+    if(cel){
+      if(cel.isSun){
+        // Halo solaire
+        const sunGrad=ctx.createRadialGradient(cel.x,cel.y,0,cel.x,cel.y,40);
+        sunGrad.addColorStop(0,'rgba(255,240,160,.35)');
+        sunGrad.addColorStop(1,'rgba(255,200,80,0)');
+        ctx.fillStyle=sunGrad;ctx.beginPath();ctx.arc(cel.x,cel.y,40,0,Math.PI*2);ctx.fill();
+        // Corps solaire
+        const sg=ctx.createRadialGradient(cel.x,cel.y,0,cel.x,cel.y,12);
+        sg.addColorStop(0,'rgba(255,255,220,1)');
+        sg.addColorStop(.5,'rgba(255,220,80,.95)');
+        sg.addColorStop(1,'rgba(255,160,40,.6)');
+        ctx.fillStyle=sg;ctx.beginPath();ctx.arc(cel.x,cel.y,12,0,Math.PI*2);ctx.fill();
+      } else {
+        // Halo lunaire doux
+        const moonGrad=ctx.createRadialGradient(cel.x,cel.y,0,cel.x,cel.y,28);
+        moonGrad.addColorStop(0,'rgba(220,225,255,.18)');
+        moonGrad.addColorStop(1,'rgba(220,225,255,0)');
+        ctx.fillStyle=moonGrad;ctx.beginPath();ctx.arc(cel.x,cel.y,28,0,Math.PI*2);ctx.fill();
+        // Corps lunaire
+        ctx.fillStyle='rgba(240,242,255,.92)';
+        ctx.beginPath();ctx.arc(cel.x,cel.y,9,0,Math.PI*2);ctx.fill();
+        // Ombre de lune (crescent)
+        ctx.fillStyle='rgba(100,110,160,.45)';
+        ctx.beginPath();ctx.arc(cel.x+3,cel.y-1,7,0,Math.PI*2);ctx.fill();
+      }
+    }
+
+    // Lueur d'horizon au lever/coucher
+    const sunrisePower=Math.max(0,1-Math.abs(h-6)*2.5)*1;
+    const sunsetPower=Math.max(0,1-Math.abs(h-19.5)*2)*1;
+    const glowPower=Math.max(sunrisePower,sunsetPower);
+    if(glowPower>.05){
+      const gx=cel?cel.x:W/2;
+      const horizGrad=ctx.createRadialGradient(gx,H,0,gx,H,W*.8);
+      horizGrad.addColorStop(0,`rgba(255,120,20,${glowPower*.4})`);
+      horizGrad.addColorStop(.4,`rgba(255,80,10,${glowPower*.15})`);
+      horizGrad.addColorStop(1,'rgba(255,60,0,0)');
+      ctx.fillStyle=horizGrad;ctx.fillRect(0,0,W,H);
+    }
+  }
+
+  resize();
+  new ResizeObserver(resize).observe(cv.parentElement);
+  skyRaf=requestAnimationFrame(drawSky);
+
+  document.addEventListener('visibilitychange',()=>{
+    if(document.hidden)cancelAnimationFrame(skyRaf);
+    else{lastSkyFrame=0;skyRaf=requestAnimationFrame(drawSky);}
+  });
+})();
+
+/* ══════════════════════════════════════════
    INIT
 ══════════════════════════════════════════ */
 if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
@@ -2625,7 +2900,7 @@ function renderCal(){
         const typeCol=info.a.c;
         const dotCol=isDn?'var(--green)':typeCol;
         cell.style.background=`${info.p.bg}`;
-        cell.style.borderColor=isDn?'rgba(48,209,88,.35)':info.p.bo;
+        cell.style.borderColor=isDn?'rgba(90,170,88,.35)':info.p.bo;
         cell.innerHTML=`<div class="cal-dot" style="background:${dotCol};box-shadow:0 0 5px ${dotCol}88"></div><div class="cal-check" style="color:var(--green)">✓</div><div class="cal-dn-num">${d.getDate()}</div>`;
       }else{
         cell.innerHTML=`<div class="cal-dn-num">${d.getDate()}</div>`;
@@ -2663,7 +2938,7 @@ function renderCalDetail(){
   el.innerHTML=`<div class="cal-detail-wrap">
     <div class="cal-det-accent" style="background:${isDn?'var(--green)':a.c}"></div>
     <div class="cal-det-eye">S${info.wn} · ${lbl} · ${info.p.l}</div>
-    <div class="cal-det-type" style="color:${isDn?'var(--green)':a.c}">${isDn?'✓ ':''}${a.l}</div>
+    <div class="cal-det-type" style="color:${isDn?'var(--green)':ac(a.c)}">${isDn?'✓ ':''}${a.l}</div>
     <div class="cal-det-desc">${info.s.d}</div>
     <div class="cal-det-pills">
       <span class="cdp hot">${a.p}</span><span class="cdp">${a.f}</span>
